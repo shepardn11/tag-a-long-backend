@@ -39,13 +39,14 @@ const signup = async (req, res, next) => {
     }
 
     // Create user in Supabase Auth
-    const { data: authData, error: authError } = await supabase.auth.admin.createUser({
+    const { data: authData, error: authError } = await supabase.auth.signUp({
       email,
       password,
-      email_confirm: true, // Auto-confirm (add email verification later if needed)
-      user_metadata: {
-        username,
-        display_name: display_name || username,
+      options: {
+        data: {
+          username,
+          display_name: display_name || username,
+        },
       },
     });
 
@@ -78,8 +79,7 @@ const signup = async (req, res, next) => {
 
     if (profileError) {
       console.error('Profile creation error:', profileError);
-      // Cleanup: delete auth user if profile creation fails
-      await supabase.auth.admin.deleteUser(authData.user.id);
+      // Note: User created in auth but profile failed - manual cleanup may be needed
       return res.status(500).json({
         success: false,
         error: {

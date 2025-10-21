@@ -1,45 +1,117 @@
-const bcrypt = require('bcrypt');
-const prisma = require('../config/database');
-const { generateToken } = require('../utils/jwt');
+// Authentication Controller - Handles user signup, login (using Supabase)
+const supabase = require('../config/supabase');
+const jwt = require('jsonwebtoken');
 
+/**
+ * Sign Up - Create new user account
+ * POST /api/auth/signup
+ */
 const signup = async (req, res, next) => {
   try {
-    const { email, password, display_name, username, bio, date_of_birth, city, instagram_handle } = req.body;
+    const { email, password, display_name, username, city, bio, instagram_handle } = req.body;
 
-    // Hash password
-    const password_hash = await bcrypt.hash(password, 10);
+    //  Validate required fields
+    if (!email || !password || !username || !city) {
+      return res.status(400).json({
+        success: false,
+        error: {
+          code: 'MISSING_FIELDS',
+          message: 'Email, password, username, and city are required',
+        },
+      });
+    }
 
-    // Create user
-    const user = await prisma.user.create({
-      data: {
-        email,
-        password_hash,
-        display_name,
+    // Check if username already exists
+    const { data: existingUser } = await supabase
+      .from('profiles')
+      .select('username')
+      .eq('username', username)
+      .single();
+
+    if (existingUser) {
+      return res.status(400).json({
+        success: false,
+        error: {
+          code: 'USERNAME_TAKEN',
+          message: 'Username already taken',
+        },
+      });
+    }
+
+    // Create user in Supabase Auth
+    const { data: authData, error: authError } = await supabase.auth.admin.createUser({
+      email,
+      password,
+      email_confirm: true, // Auto-confirm (add email verification later if needed)
+      user_metadata: {
         username,
-        bio: bio || null,
-        date_of_birth: new Date(date_of_birth),
-        city,
-        instagram_handle: instagram_handle || null,
-      },
-      select: {
-        id: true,
-        email: true,
-        display_name: true,
-        username: true,
-        bio: true,
-        city: true,
-        profile_photo_url: true,
-        created_at: true,
+        display_name: display_name || username,
       },
     });
 
+    if (authError) {
+      console.error('Supabase auth error:', authError);
+      return res.status(400).json({
+        success: false,
+        error: {
+          code: 'AUTH_ERROR',
+          message: authError.message,
+        },
+      });
+    }
+
+    // Create profile in profiles table
+    const { data: profile, error: profileError} = await supabase
+      .from('profiles')
+      .insert({
+        id: authData.user.id,
+        email,
+        username,
+        display_name: display_name || username,
+        city,
+        bio: bio || null,
+        instagram_handle: instagram_handle || null,
+      })
+      .select()
+      .single();
+
+    if (profileError) {
+      console.error('Profile creation error:', profileError);
+      // Cleanup: delete auth user if profile creation fails
+      await supabase.auth.admin.deleteUser(authData.user.id);
+      return res.status(500).json({
+        success: false,
+        error: {
+          code: 'PROFILE_ERROR',
+          message: 'Failed to create profile',
+        },
+      });
+    }
+
     // Generate JWT token
-    const token = generateToken(user.id);
+    const token = jwt.sign(
+      {
+        userId: authData.user.id,
+        email: authData.user.email,
+        username,
+      },
+      process.env.JWT_SECRET,
+      { expiresIn: process.env.JWT_EXPIRES_IN || '7d' }
+    );
 
     res.status(201).json({
       success: true,
       data: {
-        user,
+        user: {
+          id: profile.id,
+          email: profile.email,
+          username: profile.username,
+          display_name: profile.display_name,
+          city: profile.city,
+          bio: profile.bio,
+          profile_photo_url: profile.profile_photo_url,
+          created_at: profile.created_at,
+        },
         token,
       },
     });
@@ -48,28 +120,31 @@ const signup = async (req, res, next) => {
   }
 };
 
+/**
+ * Login - Authenticate user
+ * POST /api/auth/login
+ */
 const login = async (req, res, next) => {
   try {
     const { email, password } = req.body;
 
-    // Find user
-    const user = await prisma.user.findUnique({
-      where: { email },
-      select: {
-        id: true,
-        email: true,
-        password_hash: true,
-        display_name: true,
-        username: true,
-        bio: true,
-        city: true,
-        profile_photo_url: true,
-        instagram_handle: true,
-        is_active: true,
-      },
+    if (!email || !password) {
+      return res.status(400).json({
+        success: false,
+        error: {
+          code: 'MISSING_FIELDS',
+          message: 'Email and password are required',
+        },
+      });
+    }
+
+    // Authenticate with Supabase Auth
+    const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
+      email,
+      password,
     });
 
-    if (!user || !user.is_active) {
+    if (authError) {
       return res.status(401).json({
         success: false,
         error: {
@@ -79,29 +154,47 @@ const login = async (req, res, next) => {
       });
     }
 
-    // Verify password
-    const isValidPassword = await bcrypt.compare(password, user.password_hash);
+    // Get user profile
+    const { data: profile, error: profileError } = await supabase
+      .from('profiles')
+      .select('*')
+      .eq('id', authData.user.id)
+      .single();
 
-    if (!isValidPassword) {
-      return res.status(401).json({
+    if (profileError || !profile) {
+      return res.status(404).json({
         success: false,
         error: {
-          code: 'INVALID_CREDENTIALS',
-          message: 'Invalid email or password',
+          code: 'PROFILE_NOT_FOUND',
+          message: 'User profile not found',
         },
       });
     }
-
-    // Remove password_hash from response
-    delete user.password_hash;
 
     // Generate JWT token
-    const token = generateToken(user.id);
+    const token = jwt.sign(
+      {
+        userId: profile.id,
+        email: profile.email,
+        username: profile.username,
+      },
+      process.env.JWT_SECRET,
+      { expiresIn: process.env.JWT_EXPIRES_IN || '7d' }
+    );
 
     res.json({
       success: true,
       data: {
-        user,
+        user: {
+          id: profile.id,
+          email: profile.email,
+          username: profile.username,
+          display_name: profile.display_name,
+          city: profile.city,
+          bio: profile.bio,
+          profile_photo_url: profile.profile_photo_url,
+          instagram_handle: profile.instagram_handle,
+        },
         token,
       },
     });

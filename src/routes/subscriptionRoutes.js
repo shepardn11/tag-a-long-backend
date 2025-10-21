@@ -8,8 +8,11 @@ const {
   checkPremium,
 } = require('../controllers/subscriptionController');
 
-// TODO: Add auth middleware when your full app is integrated
-// For now, routes are public for testing
+// Auth middleware to protect routes
+const { authenticateUser } = require('../middleware/auth');
+
+// Apply auth middleware to all subscription routes
+router.use(authenticateUser);
 
 /**
  * POST /api/subscription/create-checkout

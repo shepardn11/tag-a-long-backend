@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "Read(//c/Users/shepa/OneDrive/Documents/Strat 490r/Portfolio/tag-a-long-backend/src/**)",
+      "Read(//c/Users/shepa/OneDrive/Documents/Strat 490r/Portfolio/tag-a-long-backend/**)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

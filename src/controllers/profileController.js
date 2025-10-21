@@ -1,50 +1,72 @@
-const prisma = require('../config/database');
-const { uploadToS3 } = require('../services/imageService');
+// Profile Controller - Handles user profile operations
+const supabase = require('../config/supabase');
 
+/**
+ * Get Current User's Profile
+ * GET /api/profile/me
+ */
 const getMyProfile = async (req, res, next) => {
   try {
-    const user = await prisma.user.findUnique({
-      where: { id: req.user.id },
-      select: {
-        id: true,
-        email: true,
-        display_name: true,
-        username: true,
-        bio: true,
-        city: true,
-        profile_photo_url: true,
-        instagram_handle: true,
-        created_at: true,
-      },
+    const userId = req.user.id;
+
+    const { data: profile, error } = await supabase
+      .from('profiles')
+      .select('*')
+      .eq('id', userId)
+      .single();
+
+    if (error || !profile) {
+      return res.status(404).json({
+        success: false,
+        error: {
+          code: 'PROFILE_NOT_FOUND',
+          message: 'Your profile was not found',
+        },
+      });
+    }
+
+    // Get subscription status
+    const { data: subscriptionData } = await supabase.rpc('get_user_plan', {
+      user_uuid: userId
     });
 
     res.json({
       success: true,
-      data: user,
+      data: {
+        ...profile,
+        subscription: subscriptionData || null,
+      },
     });
   } catch (error) {
+    console.error('Get my profile error:', error);
     next(error);
   }
 };
 
+/**
+ * Get User Profile by Username
+ * GET /api/profile/:username
+ */
 const getProfileByUsername = async (req, res, next) => {
   try {
     const { username } = req.params;
 
-    const user = await prisma.user.findUnique({
-      where: { username },
-      select: {
-        display_name: true,
-        username: true,
-        bio: true,
-        city: true,
-        profile_photo_url: true,
-        instagram_handle: true,
-        created_at: true,
-      },
-    });
+    const { data: profile, error } = await supabase
+      .from('profiles')
+      .select(`
+        id,
+        username,
+        display_name,
+        city,
+        bio,
+        profile_photo_url,
+        instagram_handle,
+        created_at
+      `)
+      .eq('username', username)
+      .single();
 
-    if (!user) {
+    if (error || !profile) {
       return res.status(404).json({
         success: false,
         error: {
@@ -54,8 +76,13 @@ const getProfileByUsername = async (req, res, next) => {
       });
     }
 
+    // Check if user is premium
+    const { data: isPremium } = await supabase.rpc('is_premium_user', {
+      user_uuid: profile.id
+    });
+
     // Format joined date
-    const joinedDate = new Date(user.created_at).toLocaleDateString('en-US', {
+    const joinedDate = new Date(profile.created_at).toLocaleDateString('en-US', {
       month: 'long',
       year: 'numeric',
     });
@@ -63,75 +90,161 @@ const getProfileByUsername = async (req, res, next) => {
     res.json({
       success: true,
       data: {
-        ...user,
+        ...profile,
+        is_premium: isPremium || false,
         joined_date: joinedDate,
-        created_at: undefined,
       },
     });
   } catch (error) {
+    console.error('Get profile error:', error);
     next(error);
   }
 };
 
+/**
+ * Update Current User's Profile
+ * PUT /api/profile
+ */
 const updateProfile = async (req, res, next) => {
   try {
-    const { display_name, bio, city, instagram_handle } = req.body;
+    const userId = req.user.id;
+    const {
+      display_name,
+      city,
+      bio,
+      instagram_handle,
+      date_of_birth,
+    } = req.body;
 
-    const updateData = {};
-    if (display_name !== undefined) updateData.display_name = display_name;
-    if (bio !== undefined) updateData.bio = bio;
-    if (city !== undefined) updateData.city = city;
-    if (instagram_handle !== undefined) updateData.instagram_handle = instagram_handle;
+    // Build update object with only provided fields
+    const updates = {};
+    if (display_name !== undefined) updates.display_name = display_name;
+    if (city !== undefined) updates.city = city;
+    if (bio !== undefined) updates.bio = bio;
+    if (instagram_handle !== undefined) updates.instagram_handle = instagram_handle;
+    if (date_of_birth !== undefined) updates.date_of_birth = date_of_birth;
 
-    const user = await prisma.user.update({
-      where: { id: req.user.id },
-      data: updateData,
-      select: {
-        id: true,
-        display_name: true,
-        bio: true,
-        city: true,
-        instagram_handle: true,
-      },
-    });
-
-    res.json({
-      success: true,
-      data: user,
-    });
-  } catch (error) {
-    next(error);
-  }
-};
-
-const uploadProfilePhoto = async (req, res, next) => {
-  try {
-    if (!req.file) {
+    if (Object.keys(updates).length === 0) {
       return res.status(400).json({
         success: false,
         error: {
-          code: 'NO_PHOTO',
-          message: 'Photo is required',
+          code: 'NO_UPDATES',
+          message: 'No fields to update',
         },
       });
     }
 
-    // Upload to S3
-    const profile_photo_url = await uploadToS3(req.file, 'profiles');
+    const { data: profile, error } = await supabase
+      .from('profiles')
+      .update(updates)
+      .eq('id', userId)
+      .select()
+      .single();
 
-    // Update user
-    await prisma.user.update({
-      where: { id: req.user.id },
-      data: { profile_photo_url },
+    if (error) {
+      console.error('Update profile error:', error);
+      return res.status(500).json({
+        success: false,
+        error: {
+          code: 'UPDATE_FAILED',
+          message: 'Failed to update profile',
+        },
+      });
+    }
+
+    res.json({
+      success: true,
+      data: profile,
     });
+  } catch (error) {
+    console.error('Update profile error:', error);
+    next(error);
+  }
+};
+
+/**
+ * Upload Profile Photo
+ * POST /api/profile/photo
+ * Note: Accepts a photo_url (pre-uploaded to Supabase Storage or S3)
+ */
+const uploadProfilePhoto = async (req, res, next) => {
+  try {
+    const userId = req.user.id;
+    const { photo_url } = req.body;
+
+    if (!photo_url) {
+      return res.status(400).json({
+        success: false,
+        error: {
+          code: 'MISSING_PHOTO',
+          message: 'Photo URL is required',
+        },
+      });
+    }
+
+    // Update profile with new photo URL
+    const { data: profile, error } = await supabase
+      .from('profiles')
+      .update({ profile_photo_url: photo_url })
+      .eq('id', userId)
+      .select()
+      .single();
+
+    if (error) {
+      console.error('Upload photo error:', error);
+      return res.status(500).json({
+        success: false,
+        error: {
+          code: 'UPLOAD_FAILED',
+          message: 'Failed to update profile photo',
+        },
+      });
+    }
 
     res.json({
       success: true,
       data: {
-        profile_photo_url,
+        profile_photo_url: profile.profile_photo_url,
       },
     });
   } catch (error) {
+    console.error('Upload photo error:', error);
+    next(error);
+  }
+};
+
+/**
+ * Delete Profile Photo
+ * DELETE /api/profile/photo
+ */
+const deleteProfilePhoto = async (req, res, next) => {
+  try {
+    const userId = req.user.id;
+
+    const { data: profile, error } = await supabase
+      .from('profiles')
+      .update({ profile_photo_url: null })
+      .eq('id', userId)
+      .select()
+      .single();
+
+    if (error) {
+      console.error('Delete photo error:', error);
+      return res.status(500).json({
+        success: false,
+        error: {
+          code: 'DELETE_FAILED',
+          message: 'Failed to delete profile photo',
+        },
+      });
+    }
+
+    res.json({
+      success: true,
+      message: 'Profile photo deleted successfully',
+    });
+  } catch (error) {
+    console.error('Delete photo error:', error);
     next(error);
   }
 };
@@ -141,4 +254,5 @@ module.exports = {
   getProfileByUsername,
   updateProfile,
   uploadProfilePhoto,
+  deleteProfilePhoto,
 };

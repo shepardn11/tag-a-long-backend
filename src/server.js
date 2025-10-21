@@ -5,6 +5,11 @@ const helmet = require('helmet');
 const morgan = require('morgan');
 // Import routes
 const authRoutes = require('./routes/auth');
+const profileRoutes = require('./routes/profile');
+const listingRoutes = require('./routes/listing');
+const requestRoutes = require('./routes/request');
+const notificationRoutes = require('./routes/notification');
+const safetyRoutes = require('./routes/safety');
 const subscriptionRoutes = require('./routes/subscriptionRoutes');
 const webhookRoutes = require('./routes/webhookRoutes');
 
@@ -27,6 +32,11 @@ app.use(morgan('dev'));
 
 // Routes
 app.use('/api/auth', authRoutes);
+app.use('/api/profile', profileRoutes);
+app.use('/api/listings', listingRoutes);
+app.use('/api/requests', requestRoutes);
+app.use('/api/notifications', notificationRoutes);
+app.use('/api/safety', safetyRoutes);
 app.use('/api/subscription', subscriptionRoutes);
 
 // Health check

@@ -3,24 +3,12 @@ const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
 const morgan = require('morgan');
-const { errorHandler } = require('./middleware/errorHandler');
-const { apiLimiter } = require('./middleware/rateLimiter');
-const { initializeFirebase } = require('./services/fcmService');
-
-// Import routes
-const authRoutes = require('./routes/auth');
-const profileRoutes = require('./routes/profile');
-const listingsRoutes = require('./routes/listings');
-const requestsRoutes = require('./routes/requests');
-const notificationsRoutes = require('./routes/notifications');
+// Import routes - Only Stripe subscription routes for now
 const subscriptionRoutes = require('./routes/subscriptionRoutes');
 const webhookRoutes = require('./routes/webhookRoutes');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
-
-// Initialize Firebase for push notifications
-initializeFirebase();
 
 // Middleware
 app.use(helmet());
@@ -36,15 +24,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(morgan('dev'));
 
-// Rate limiting
-app.use('/api', apiLimiter);
-
 // Routes
-app.use('/api/auth', authRoutes);
-app.use('/api/profile', profileRoutes);
-app.use('/api/listings', listingsRoutes);
-app.use('/api/requests', requestsRoutes);
-app.use('/api/notifications', notificationsRoutes);
 app.use('/api/subscription', subscriptionRoutes);
 
 // Health check
@@ -64,7 +44,10 @@ app.use((req, res) => {
 });
 
 // Global error handler (must be last)
-app.use(errorHandler);
+app.use((err, req, res, next) => {
+  console.error(err.stack);
+  res.status(500).json({ error: 'Internal server error' });
+});
 
 // Start server
 app.listen(PORT, () => {

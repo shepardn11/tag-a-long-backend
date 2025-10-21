@@ -8,15 +8,15 @@ const jwt = require('jsonwebtoken');
  */
 const signup = async (req, res, next) => {
   try {
-    const { email, password, display_name, username, city, bio, instagram_handle } = req.body;
+    const { email, password, display_name, username, city, date_of_birth, bio, instagram_handle } = req.body;
 
     //  Validate required fields
-    if (!email || !password || !username || !city) {
+    if (!email || !password || !username || !city || !date_of_birth) {
       return res.status(400).json({
         success: false,
         error: {
           code: 'MISSING_FIELDS',
-          message: 'Email, password, username, and city are required',
+          message: 'Email, password, username, city, and date_of_birth are required',
         },
       });
     }
@@ -69,6 +69,7 @@ const signup = async (req, res, next) => {
         username,
         display_name: display_name || username,
         city,
+        date_of_birth,
         bio: bio || null,
         instagram_handle: instagram_handle || null,
       })

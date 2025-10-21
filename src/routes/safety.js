@@ -1,6 +1,7 @@
 // Safety Routes - User blocking and reporting endpoints
 const express = require('express');
 const { authenticateToken } = require('../middleware/auth');
+const { validate, schemas } = require('../middleware/validation');
 const {
   blockUser,
   unblockUser,
@@ -20,7 +21,7 @@ router.use(authenticateToken);
  * Block a user
  * Body: { blocked_user_id }
  */
-router.post('/block', blockUser);
+router.post('/block', validate(schemas.blockUserSchema), blockUser);
 
 /**
  * DELETE /api/safety/block/:blockedUserId
@@ -47,7 +48,7 @@ router.get('/is-blocked/:userId', isBlocked);
  * Body: { reported_user_id, reason, description? }
  * Valid reasons: spam, harassment, inappropriate_content, fake_profile, safety_concern, other
  */
-router.post('/report', reportUser);
+router.post('/report', validate(schemas.reportUserSchema), reportUser);
 
 /**
  * GET /api/safety/my-reports

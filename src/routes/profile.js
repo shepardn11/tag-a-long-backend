@@ -1,6 +1,7 @@
 // Profile Routes - User profile management endpoints
 const express = require('express');
 const { authenticateToken } = require('../middleware/auth');
+const { validate, schemas } = require('../middleware/validation');
 const {
   getMyProfile,
   getProfileByUsername,
@@ -28,14 +29,14 @@ router.get('/:username', getProfileByUsername);
  * Update current user's profile
  * Body: { display_name?, city?, bio?, instagram_handle?, date_of_birth? }
  */
-router.put('/', authenticateToken, updateProfile);
+router.put('/', authenticateToken, validate(schemas.updateProfileSchema), updateProfile);
 
 /**
  * POST /api/profile/photo
  * Upload/update profile photo
  * Body: { photo_url: string }
  */
-router.post('/photo', authenticateToken, uploadProfilePhoto);
+router.post('/photo', authenticateToken, validate(schemas.uploadPhotoSchema), uploadProfilePhoto);
 
 /**
  * DELETE /api/profile/photo

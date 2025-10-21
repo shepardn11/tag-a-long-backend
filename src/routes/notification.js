@@ -1,6 +1,7 @@
 // Notification Routes - In-app notification endpoints
 const express = require('express');
 const { authenticateToken } = require('../middleware/auth');
+const { validate, schemas } = require('../middleware/validation');
 const {
   getNotifications,
   getUnreadCount,
@@ -39,7 +40,7 @@ router.put('/read-all', markAllAsRead);
  * Update push notification token for mobile device
  * Body: { push_token, device_platform? }
  */
-router.put('/push-token', updatePushToken);
+router.put('/push-token', validate(schemas.updatePushTokenSchema), updatePushToken);
 
 /**
  * PUT /api/notifications/:notificationId/read

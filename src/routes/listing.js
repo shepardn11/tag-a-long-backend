@@ -1,6 +1,7 @@
 // Listing Routes - Activity listing endpoints with premium priority
 const express = require('express');
 const { authenticateToken } = require('../middleware/auth');
+const { validate, schemas } = require('../middleware/validation');
 const {
   createListing,
   getFeed,
@@ -22,7 +23,7 @@ router.use(authenticateToken);
  * Create new activity listing
  * Body: { title, description, category, location, date, time?, max_participants?, photos? }
  */
-router.post('/', createListing);
+router.post('/', validate(schemas.createListingSchema), createListing);
 
 /**
  * GET /api/listings/feed
@@ -63,7 +64,7 @@ router.get('/:listingId', getListingById);
  * Update own listing
  * Body: { title?, description?, category?, location?, date?, time?, max_participants?, photos?, status? }
  */
-router.put('/:listingId', updateListing);
+router.put('/:listingId', validate(schemas.updateListingSchema), updateListing);
 
 /**
  * DELETE /api/listings/:listingId

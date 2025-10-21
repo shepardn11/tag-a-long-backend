@@ -1,6 +1,7 @@
 // Request Routes - Tag-along request endpoints
 const express = require('express');
 const { authenticateToken } = require('../middleware/auth');
+const { validate, schemas } = require('../middleware/validation');
 const {
   sendRequest,
   acceptRequest,
@@ -21,7 +22,7 @@ router.use(authenticateToken);
  * Send a tag-along request
  * Body: { listing_id, message? }
  */
-router.post('/', sendRequest);
+router.post('/', validate(schemas.sendRequestSchema), sendRequest);
 
 /**
  * GET /api/requests/received

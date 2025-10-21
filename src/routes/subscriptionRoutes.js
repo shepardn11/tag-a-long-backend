@@ -1,6 +1,7 @@
 // Subscription Routes - Stripe payment endpoints
 const express = require('express');
 const router = express.Router();
+const { validate, schemas } = require('../middleware/validation');
 const {
   createCheckoutSession,
   cancelSubscription,
@@ -25,7 +26,7 @@ router.post('/create-checkout', createCheckoutSession);
  * Cancel user's subscription
  * Body: { immediate: boolean } - optional
  */
-router.post('/cancel', cancelSubscription);
+router.post('/cancel', validate(schemas.cancelSubscriptionSchema), cancelSubscription);
 
 /**
  * GET /api/subscription/status

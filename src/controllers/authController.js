@@ -46,6 +46,10 @@ const signup = async (req, res, next) => {
         data: {
           username,
           display_name: display_name || username,
+          city,
+          date_of_birth,
+          bio: bio || null,
+          instagram_handle: instagram_handle || null,
         },
       },
     });
@@ -61,34 +65,20 @@ const signup = async (req, res, next) => {
       });
     }
 
-    // Create profile in profiles table
-    const profileData = {
-      id: authData.user.id,
-      email,
-      username,
-      display_name: display_name || username,
-      city,
-      date_of_birth,
-      bio: bio || null,
-      instagram_handle: instagram_handle || null,
-    };
-    console.log('Creating profile with data:', JSON.stringify(profileData, null, 2));
-
+    // Profile is auto-created by database trigger, fetch it
     const { data: profile, error: profileError} = await supabase
       .from('profiles')
-      .insert(profileData)
-      .select()
+      .select('*')
+      .eq('id', authData.user.id)
       .single();
 
     if (profileError) {
-      console.error('Profile creation error:', profileError);
-      console.error('Profile error details:', JSON.stringify(profileError, null, 2));
-      // Note: User created in auth but profile failed - manual cleanup may be needed
+      console.error('Profile fetch error:', profileError);
       return res.status(500).json({
         success: false,
         error: {
           code: 'PROFILE_ERROR',
-          message: 'Failed to create profile',
+          message: 'Failed to fetch profile after signup',
           details: profileError.message || profileError,
         },
       });

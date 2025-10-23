@@ -8,6 +8,8 @@ const {
   updateProfile,
   uploadProfilePhoto,
   deleteProfilePhoto,
+  addGalleryPhoto,
+  removeGalleryPhoto,
 } = require('../controllers/profileController');
 
 const router = express.Router();
@@ -43,5 +45,18 @@ router.post('/photo', authenticateToken, validate(schemas.uploadPhotoSchema), up
  * Delete profile photo
  */
 router.delete('/photo', authenticateToken, deleteProfilePhoto);
+
+/**
+ * POST /api/profile/gallery
+ * Add photo to gallery (max 5 photos)
+ * Body: { photo_url: string }
+ */
+router.post('/gallery', authenticateToken, validate(schemas.uploadPhotoSchema), addGalleryPhoto);
+
+/**
+ * DELETE /api/profile/gallery/:index
+ * Remove photo from gallery by index (0-4)
+ */
+router.delete('/gallery/:index', authenticateToken, removeGalleryPhoto);
 
 module.exports = router;

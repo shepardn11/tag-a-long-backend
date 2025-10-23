@@ -249,10 +249,182 @@ const deleteProfilePhoto = async (req, res, next) => {
   }
 };
 
+/**
+ * Add Photo to Gallery
+ * POST /api/profile/gallery
+ * Body: { photo_url: string }
+ */
+const addGalleryPhoto = async (req, res, next) => {
+  try {
+    const userId = req.user.id;
+    const { photo_url } = req.body;
+
+    if (!photo_url) {
+      return res.status(400).json({
+        success: false,
+        error: {
+          code: 'MISSING_PHOTO',
+          message: 'Photo URL is required',
+        },
+      });
+    }
+
+    // Get current gallery
+    const { data: profile, error: fetchError } = await supabase
+      .from('profiles')
+      .select('photo_gallery')
+      .eq('id', userId)
+      .single();
+
+    if (fetchError) {
+      console.error('Fetch profile error:', fetchError);
+      return res.status(500).json({
+        success: false,
+        error: {
+          code: 'FETCH_FAILED',
+          message: 'Failed to fetch profile',
+        },
+      });
+    }
+
+    const currentGallery = profile.photo_gallery || [];
+
+    // Check if gallery is full (max 5 photos)
+    if (currentGallery.length >= 5) {
+      return res.status(400).json({
+        success: false,
+        error: {
+          code: 'GALLERY_FULL',
+          message: 'Photo gallery is full (maximum 5 photos)',
+        },
+      });
+    }
+
+    // Add new photo to gallery
+    const updatedGallery = [...currentGallery, photo_url];
+
+    // Update profile with new gallery
+    const { data: updatedProfile, error: updateError } = await supabase
+      .from('profiles')
+      .update({ photo_gallery: updatedGallery })
+      .eq('id', userId)
+      .select()
+      .single();
+
+    if (updateError) {
+      console.error('Update gallery error:', updateError);
+      return res.status(500).json({
+        success: false,
+        error: {
+          code: 'UPDATE_FAILED',
+          message: 'Failed to add photo to gallery',
+        },
+      });
+    }
+
+    res.json({
+      success: true,
+      data: {
+        photo_gallery: updatedProfile.photo_gallery,
+      },
+    });
+  } catch (error) {
+    console.error('Add gallery photo error:', error);
+    next(error);
+  }
+};
+
+/**
+ * Remove Photo from Gallery
+ * DELETE /api/profile/gallery/:index
+ * Params: { index: number } - Index of photo to remove (0-4)
+ */
+const removeGalleryPhoto = async (req, res, next) => {
+  try {
+    const userId = req.user.id;
+    const photoIndex = parseInt(req.params.index);
+
+    if (isNaN(photoIndex) || photoIndex < 0 || photoIndex > 4) {
+      return res.status(400).json({
+        success: false,
+        error: {
+          code: 'INVALID_INDEX',
+          message: 'Photo index must be between 0 and 4',
+        },
+      });
+    }
+
+    // Get current gallery
+    const { data: profile, error: fetchError } = await supabase
+      .from('profiles')
+      .select('photo_gallery')
+      .eq('id', userId)
+      .single();
+
+    if (fetchError) {
+      console.error('Fetch profile error:', fetchError);
+      return res.status(500).json({
+        success: false,
+        error: {
+          code: 'FETCH_FAILED',
+          message: 'Failed to fetch profile',
+        },
+      });
+    }
+
+    const currentGallery = profile.photo_gallery || [];
+
+    // Check if index is valid
+    if (photoIndex >= currentGallery.length) {
+      return res.status(400).json({
+        success: false,
+        error: {
+          code: 'INDEX_OUT_OF_BOUNDS',
+          message: 'Photo index does not exist in gallery',
+        },
+      });
+    }
+
+    // Remove photo at index
+    const updatedGallery = currentGallery.filter((_, index) => index !== photoIndex);
+
+    // Update profile with new gallery
+    const { data: updatedProfile, error: updateError } = await supabase
+      .from('profiles')
+      .update({ photo_gallery: updatedGallery })
+      .eq('id', userId)
+      .select()
+      .single();
+
+    if (updateError) {
+      console.error('Update gallery error:', updateError);
+      return res.status(500).json({
+        success: false,
+        error: {
+          code: 'UPDATE_FAILED',
+          message: 'Failed to remove photo from gallery',
+        },
+      });
+    }
+
+    res.json({
+      success: true,
+      data: {
+        photo_gallery: updatedProfile.photo_gallery,
+      },
+    });
+  } catch (error) {
+    console.error('Remove gallery photo error:', error);
+    next(error);
+  }
+};
+
 module.exports = {
   getMyProfile,
   getProfileByUsername,
   updateProfile,
   uploadProfilePhoto,
   deleteProfilePhoto,
+  addGalleryPhoto,
+  removeGalleryPhoto,
 };

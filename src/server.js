@@ -18,10 +18,17 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 // Middleware
-app.use(helmet());
+// CORS must come before helmet to work properly
 app.use(cors({
   origin: '*', // Allow all origins for development
   credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+}));
+
+// Configure helmet with relaxed settings for development
+app.use(helmet({
+  crossOriginResourcePolicy: false,
 }));
 
 // IMPORTANT: Webhook route needs raw body BEFORE express.json()

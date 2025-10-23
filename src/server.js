@@ -12,6 +12,7 @@ const notificationRoutes = require('./routes/notification');
 const safetyRoutes = require('./routes/safety');
 const subscriptionRoutes = require('./routes/subscriptionRoutes');
 const webhookRoutes = require('./routes/webhookRoutes');
+const uploadRoutes = require('./routes/upload');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -38,6 +39,7 @@ app.use('/api/requests', requestRoutes);
 app.use('/api/notifications', notificationRoutes);
 app.use('/api/safety', safetyRoutes);
 app.use('/api/subscription', subscriptionRoutes);
+app.use('/api/upload', uploadRoutes);
 
 // Health check
 app.get('/health', (req, res) => {

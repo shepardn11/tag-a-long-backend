@@ -38,6 +38,9 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(morgan('dev'));
 
+// Handle preflight requests for all routes
+app.options('*', cors());
+
 // Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/profile', profileRoutes);

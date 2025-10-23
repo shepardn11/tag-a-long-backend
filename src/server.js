@@ -12,23 +12,15 @@ const notificationRoutes = require('./routes/notification');
 const safetyRoutes = require('./routes/safety');
 const subscriptionRoutes = require('./routes/subscriptionRoutes');
 const webhookRoutes = require('./routes/webhookRoutes');
-const uploadRoutes = require('./routes/upload');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
 // Middleware
-// CORS must come before helmet to work properly
+app.use(helmet());
 app.use(cors({
   origin: '*', // Allow all origins for development
   credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization'],
-}));
-
-// Configure helmet with relaxed settings for development
-app.use(helmet({
-  crossOriginResourcePolicy: false,
 }));
 
 // IMPORTANT: Webhook route needs raw body BEFORE express.json()
@@ -38,9 +30,6 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(morgan('dev'));
 
-// Handle preflight requests for all routes
-app.options('*', cors());
-
 // Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/profile', profileRoutes);
@@ -49,7 +38,6 @@ app.use('/api/requests', requestRoutes);
 app.use('/api/notifications', notificationRoutes);
 app.use('/api/safety', safetyRoutes);
 app.use('/api/subscription', subscriptionRoutes);
-app.use('/api/upload', uploadRoutes);
 
 // Health check
 app.get('/health', (req, res) => {

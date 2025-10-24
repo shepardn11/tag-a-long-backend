@@ -203,9 +203,7 @@ const uploadProfilePhoto = async (req, res, next) => {
 
     res.json({
       success: true,
-      data: {
-        profile_photo_url: profile.profile_photo_url,
-      },
+      data: profile,
     });
   } catch (error) {
     console.error('Upload photo error:', error);
@@ -324,9 +322,7 @@ const addGalleryPhoto = async (req, res, next) => {
 
     res.json({
       success: true,
-      data: {
-        photo_gallery: updatedProfile.photo_gallery,
-      },
+      data: updatedProfile,
     });
   } catch (error) {
     console.error('Add gallery photo error:', error);
@@ -409,9 +405,7 @@ const removeGalleryPhoto = async (req, res, next) => {
 
     res.json({
       success: true,
-      data: {
-        photo_gallery: updatedProfile.photo_gallery,
-      },
+      data: updatedProfile,
     });
   } catch (error) {
     console.error('Remove gallery photo error:', error);

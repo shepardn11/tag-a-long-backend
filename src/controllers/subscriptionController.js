@@ -8,7 +8,7 @@ const supabase = require('../config/supabase');
  */
 exports.createCheckoutSession = async (req, res) => {
   try {
-    const userId = req.user.id;
+    const userId = req.user.id; // Get user ID from auth middleware
 
     // Get user profile from Supabase
     const { data: profile, error: profileError } = await supabase

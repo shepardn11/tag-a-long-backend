@@ -1,7 +1,6 @@
 // Subscription Routes - Stripe payment endpoints
 const express = require('express');
 const router = express.Router();
-const { validate, schemas } = require('../middleware/validation');
 const {
   createCheckoutSession,
   cancelSubscription,
@@ -9,7 +8,8 @@ const {
   checkPremium,
 } = require('../controllers/subscriptionController');
 
-// Auth middleware to protect routes
+// Middleware to verify authentication (you should have this already)
+// Assuming you have an auth middleware that sets req.user
 const { authenticateUser } = require('../middleware/auth');
 
 // Apply auth middleware to all subscription routes
@@ -26,7 +26,7 @@ router.post('/create-checkout', createCheckoutSession);
  * Cancel user's subscription
  * Body: { immediate: boolean } - optional
  */
-router.post('/cancel', validate(schemas.cancelSubscriptionSchema), cancelSubscription);
+router.post('/cancel', cancelSubscription);
 
 /**
  * GET /api/subscription/status

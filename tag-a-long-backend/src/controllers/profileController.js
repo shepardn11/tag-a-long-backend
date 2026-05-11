@@ -267,13 +267,13 @@ const addGalleryPhoto = async (req, res, next) => {
       select: { photo_gallery: true },
     });
 
-    // Check if gallery is full (max 5 photos)
-    if (user.photo_gallery && user.photo_gallery.length >= 5) {
+    // Check if gallery is full (max 6 photos)
+    if (user.photo_gallery && user.photo_gallery.length >= 6) {
       return res.status(400).json({
         success: false,
         error: {
           code: 'GALLERY_FULL',
-          message: 'Gallery is full. Maximum 5 photos allowed.',
+          message: 'Gallery is full. Maximum 6 photos allowed.',
         },
       });
     }

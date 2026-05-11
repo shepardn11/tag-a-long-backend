@@ -39,7 +39,7 @@ export default function ProfileSetupScreen({ navigation }: Props) {
   const [bio, setBio] = useState('');
   const [instagramHandle, setInstagramHandle] = useState('');
   const [profilePhoto, setProfilePhoto] = useState<string | null>(null);
-  const [galleryPhotos, setGalleryPhotos] = useState<(string | null)[]>([null, null, null, null, null]);
+  const [galleryPhotos, setGalleryPhotos] = useState<(string | null)[]>([null, null, null, null, null, null]);
   const [isLoading, setIsLoading] = useState(false);
   const [isUploadingPhoto, setIsUploadingPhoto] = useState(false);
   const [uploadingGalleryIndex, setUploadingGalleryIndex] = useState<number | null>(null);
@@ -321,7 +321,7 @@ export default function ProfileSetupScreen({ navigation }: Props) {
 
           {/* Photo Gallery Section */}
           <View style={styles.photosSection}>
-            <Text style={styles.sectionTitle}>Photo Gallery (up to 5 photos)</Text>
+            <Text style={styles.sectionTitle}>Photo Gallery (up to 6 photos)</Text>
             <View style={styles.galleryGrid}>
               {galleryPhotos.map((photo, index) => {
                 return (

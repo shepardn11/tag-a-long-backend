@@ -60,9 +60,9 @@ export default function ProfileScreen() {
     setEditBio(user?.bio || '');
     setEditCity(user?.city || '');
     const gallery = user?.photo_gallery || [];
-    // Pad to 5 slots
+    // Pad to 6 slots
     const padded: (string | null)[] = [...gallery];
-    while (padded.length < 5) padded.push(null);
+    while (padded.length < 6) padded.push(null);
     setEditGallery(padded);
     setEditVisible(true);
   };

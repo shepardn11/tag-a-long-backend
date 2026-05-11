@@ -541,7 +541,7 @@ const styles = StyleSheet.create({
   gallerySection: { paddingTop: 16 },
   galleryTitle: { fontSize: 16, fontWeight: '600', color: '#1a1a1a', marginBottom: 10, letterSpacing: 0.2, paddingHorizontal: 20 },
   galleryGrid: { flexDirection: 'row', flexWrap: 'wrap' },
-  galleryPhotoContainer: { width: '33.33%', aspectRatio: 1, overflow: 'hidden', backgroundColor: '#f5f5f5', padding: 1 },
+  galleryPhotoContainer: { width: '50%', aspectRatio: 1, overflow: 'hidden', backgroundColor: '#f5f5f5', padding: 1 },
   galleryPhoto: { width: '100%', height: '100%' },
   logoutButton: {
     flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8,

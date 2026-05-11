@@ -6,12 +6,19 @@ import {
   Dimensions,
   View,
   Animated,
-  PanResponder,
+  Easing,
 } from 'react-native';
+import {
+  PinchGestureHandler,
+  PanGestureHandler,
+  TapGestureHandler,
+  State,
+  GestureHandlerRootView,
+} from 'react-native-gesture-handler';
 import { Image } from 'expo-image';
 import { Ionicons } from '@expo/vector-icons';
 
-const { width: SCREEN_W, height: SCREEN_H } = Dimensions.get('window');
+const { width: SCREEN_W } = Dimensions.get('window');
 
 interface Props {
   uri: string | null;
@@ -19,118 +26,165 @@ interface Props {
 }
 
 export default function LightboxModal({ uri, onClose }: Props) {
-  const scale = useRef(new Animated.Value(1)).current;
-  const tx = useRef(new Animated.Value(0)).current;
-  const ty = useRef(new Animated.Value(0)).current;
+  const pinchRef = useRef<PinchGestureHandler>(null);
+  const panRef = useRef<PanGestureHandler>(null);
+  const doubleTapRef = useRef<TapGestureHandler>(null);
 
-  const sv = useRef(1);   // current scale value
-  const bx = useRef(0);   // base translate x (saved between gestures)
-  const by = useRef(0);   // base translate y (saved between gestures)
-  const gx = useRef(0);   // gesture start base x
-  const gy = useRef(0);   // gesture start base y
+  // Scale: baseScale * pinchScale = displayed scale
+  const baseScaleAnim = useRef(new Animated.Value(1)).current;
+  const pinchScaleAnim = useRef(new Animated.Value(1)).current;
+  const totalScale = useRef(Animated.multiply(baseScaleAnim, pinchScaleAnim)).current;
+  const committedScale = useRef(1);
 
-  const pinchDist = useRef<number | null>(null);
-  const pinchScale = useRef(1);
-  const lastTap = useRef(0);
+  // Translation: baseTx + panTx = displayed tx
+  const baseTxAnim = useRef(new Animated.Value(0)).current;
+  const panTxAnim = useRef(new Animated.Value(0)).current;
+  const totalTx = useRef(Animated.add(baseTxAnim, panTxAnim)).current;
+  const baseTyAnim = useRef(new Animated.Value(0)).current;
+  const panTyAnim = useRef(new Animated.Value(0)).current;
+  const totalTy = useRef(Animated.add(baseTyAnim, panTyAnim)).current;
+  const committedTx = useRef(0);
+  const committedTy = useRef(0);
 
-  const getTouchDist = (touches: any[]) => {
-    const dx = touches[0].pageX - touches[1].pageX;
-    const dy = touches[0].pageY - touches[1].pageY;
-    return Math.sqrt(dx * dx + dy * dy);
+  const maxPan = (s: number) => Math.max(0, (SCREEN_W * (s - 1)) / 2);
+  const clamp = (v: number, lo: number, hi: number) => Math.max(lo, Math.min(hi, v));
+
+  const resetAll = (animated = true) => {
+    committedScale.current = 1;
+    committedTx.current = 0;
+    committedTy.current = 0;
+    pinchScaleAnim.setValue(1);
+    panTxAnim.setValue(0);
+    panTyAnim.setValue(0);
+    if (animated) {
+      Animated.parallel([
+        Animated.spring(baseScaleAnim, { toValue: 1, useNativeDriver: true, overshootClamping: true, tension: 100, friction: 10 }),
+        Animated.spring(baseTxAnim, { toValue: 0, useNativeDriver: true, overshootClamping: true }),
+        Animated.spring(baseTyAnim, { toValue: 0, useNativeDriver: true, overshootClamping: true }),
+      ]).start();
+    } else {
+      baseScaleAnim.setValue(1);
+      baseTxAnim.setValue(0);
+      baseTyAnim.setValue(0);
+    }
   };
 
-  const springTo = (s: number, x = 0, y = 0) => {
-    sv.current = s; bx.current = x; by.current = y;
-    Animated.parallel([
-      Animated.spring(scale, { toValue: s, useNativeDriver: true }),
-      Animated.spring(tx, { toValue: x, useNativeDriver: true }),
-      Animated.spring(ty, { toValue: y, useNativeDriver: true }),
-    ]).start();
+  // --- Pinch ---
+  const onPinchEvent = Animated.event(
+    [{ nativeEvent: { scale: pinchScaleAnim } }],
+    { useNativeDriver: true }
+  );
+
+  const onPinchStateChange = ({ nativeEvent: e }: any) => {
+    if (e.oldState === State.ACTIVE) {
+      const newScale = clamp(committedScale.current * e.scale, 1, 6);
+      committedScale.current = newScale;
+      baseScaleAnim.setValue(newScale);
+      pinchScaleAnim.setValue(1);
+      if (newScale <= 1.05) resetAll(true);
+    }
   };
 
-  const pr = useRef(
-    PanResponder.create({
-      onStartShouldSetPanResponder: () => true,
-      onMoveShouldSetPanResponder: () => true,
+  // --- Pan ---
+  const onPanEvent = Animated.event(
+    [{ nativeEvent: { translationX: panTxAnim, translationY: panTyAnim } }],
+    { useNativeDriver: true }
+  );
 
-      onPanResponderGrant: (evt) => {
-        const touches = evt.nativeEvent.touches;
-        gx.current = bx.current;
-        gy.current = by.current;
-        if (touches.length >= 2) {
-          pinchDist.current = getTouchDist(Array.from(touches));
-          pinchScale.current = sv.current;
-        }
-      },
+  const onPanStateChange = ({ nativeEvent: e }: any) => {
+    if (e.state === State.BEGAN) {
+      panTxAnim.setValue(0);
+      panTyAnim.setValue(0);
+    }
+    if (e.oldState === State.ACTIVE) {
+      const maxP = maxPan(committedScale.current);
+      const curTx = committedTx.current + e.translationX;
+      const curTy = committedTy.current + e.translationY;
+      const finalTx = clamp(curTx + e.velocityX * 0.08, -maxP, maxP);
+      const finalTy = clamp(curTy + e.velocityY * 0.08, -maxP, maxP);
 
-      onPanResponderMove: (evt, g) => {
-        const touches = evt.nativeEvent.touches;
-        if (touches.length >= 2 && pinchDist.current !== null) {
-          const newDist = getTouchDist(Array.from(touches));
-          const newScale = Math.max(1, Math.min(pinchScale.current * (newDist / pinchDist.current), 6));
-          sv.current = newScale;
-          scale.setValue(newScale);
-        } else if (sv.current > 1) {
-          const nx = gx.current + g.dx;
-          const ny = gy.current + g.dy;
-          bx.current = nx; by.current = ny;
-          tx.setValue(nx); ty.setValue(ny);
-        }
-      },
+      committedTx.current = finalTx;
+      committedTy.current = finalTy;
 
-      onPanResponderRelease: (evt, g) => {
-        const remaining = evt.nativeEvent.touches.length;
-        const wasPinch = pinchDist.current !== null;
-        pinchDist.current = null;
+      // Commit current visual position with no jump
+      baseTxAnim.setValue(curTx);
+      panTxAnim.setValue(0);
+      baseTyAnim.setValue(curTy);
+      panTyAnim.setValue(0);
 
-        if (remaining > 0) return;
+      // Glide to momentum target
+      Animated.parallel([
+        Animated.timing(baseTxAnim, { toValue: finalTx, duration: 280, easing: Easing.out(Easing.cubic), useNativeDriver: true }),
+        Animated.timing(baseTyAnim, { toValue: finalTy, duration: 280, easing: Easing.out(Easing.cubic), useNativeDriver: true }),
+      ]).start();
+    }
+  };
 
-        if (wasPinch) {
-          if (sv.current <= 1.05) springTo(1, 0, 0);
-          return;
-        }
-
-        if (sv.current > 1) return;
-
-        // Tap detection
-        const isTap = Math.abs(g.dx) < 8 && Math.abs(g.dy) < 8;
-        if (!isTap) return;
-
-        const now = Date.now();
-        if (now - lastTap.current < 300) {
-          lastTap.current = 0;
-          springTo(2.5);
-        } else {
-          lastTap.current = now;
-          setTimeout(() => {
-            if (Date.now() - lastTap.current >= 290) onClose();
-          }, 300);
-        }
-      },
-    })
-  ).current;
+  // --- Double tap to zoom ---
+  const onDoubleTap = ({ nativeEvent: e }: any) => {
+    if (e.state === State.ACTIVE) {
+      if (committedScale.current > 1.5) {
+        resetAll(true);
+      } else {
+        committedScale.current = 2.5;
+        Animated.spring(baseScaleAnim, { toValue: 2.5, useNativeDriver: true, overshootClamping: true, tension: 100, friction: 10 }).start();
+      }
+    }
+  };
 
   return (
     <Modal
       visible={!!uri}
       transparent
-      animationType="fade"
+      animationType="none"
       onRequestClose={onClose}
-      onShow={() => {
-        scale.setValue(1); tx.setValue(0); ty.setValue(0);
-        sv.current = 1; bx.current = 0; by.current = 0;
-      }}
+      onShow={() => resetAll(false)}
     >
-      <View style={styles.backdrop} {...pr.panHandlers}>
-        <Animated.View
-          style={[styles.imgWrap, { transform: [{ translateX: tx }, { translateY: ty }, { scale }] }]}
-        >
-          <Image source={{ uri: uri ?? '' }} style={styles.img} contentFit="contain" />
-        </Animated.View>
-        <TouchableOpacity style={styles.closeBtn} onPress={onClose}>
-          <Ionicons name="close-circle" size={34} color="#fff" />
-        </TouchableOpacity>
-      </View>
+      <GestureHandlerRootView style={{ flex: 1 }}>
+        <View style={styles.backdrop}>
+          <TapGestureHandler
+            ref={doubleTapRef}
+            onHandlerStateChange={onDoubleTap}
+            numberOfTaps={2}
+          >
+            <Animated.View style={{ flex: 1, width: '100%', justifyContent: 'center', alignItems: 'center' }}>
+              <PanGestureHandler
+                ref={panRef}
+                onGestureEvent={onPanEvent}
+                onHandlerStateChange={onPanStateChange}
+                simultaneousHandlers={pinchRef}
+                minDist={8}
+                avgTouches
+              >
+                <Animated.View style={{ width: '100%', height: '100%', justifyContent: 'center', alignItems: 'center' }}>
+                  <PinchGestureHandler
+                    ref={pinchRef}
+                    onGestureEvent={onPinchEvent}
+                    onHandlerStateChange={onPinchStateChange}
+                    simultaneousHandlers={panRef}
+                  >
+                    <Animated.View
+                      style={[styles.imgWrap, {
+                        transform: [
+                          { translateX: totalTx },
+                          { translateY: totalTy },
+                          { scale: totalScale },
+                        ],
+                      }]}
+                    >
+                      <Image source={{ uri: uri ?? '' }} style={styles.img} contentFit="contain" />
+                    </Animated.View>
+                  </PinchGestureHandler>
+                </Animated.View>
+              </PanGestureHandler>
+            </Animated.View>
+          </TapGestureHandler>
+
+          <TouchableOpacity style={styles.closeBtn} onPress={onClose}>
+            <Ionicons name="close-circle" size={34} color="#fff" />
+          </TouchableOpacity>
+        </View>
+      </GestureHandlerRootView>
     </Modal>
   );
 }
@@ -138,19 +192,19 @@ export default function LightboxModal({ uri, onClose }: Props) {
 const styles = StyleSheet.create({
   backdrop: {
     flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.92)',
+    backgroundColor: 'rgba(0,0,0,0.85)',
     justifyContent: 'center',
     alignItems: 'center',
   },
   imgWrap: {
     width: SCREEN_W,
-    height: SCREEN_H * 0.8,
+    aspectRatio: 1,
     justifyContent: 'center',
     alignItems: 'center',
   },
   img: {
     width: SCREEN_W,
-    height: SCREEN_H * 0.8,
+    height: SCREEN_W,
   },
   closeBtn: {
     position: 'absolute',

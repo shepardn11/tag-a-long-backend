@@ -18,6 +18,9 @@ import { Image } from 'expo-image';
 import { Ionicons } from '@expo/vector-icons';
 import { messageAPI, safetyAPI } from '../../api/endpoints';
 import { useAuthStore } from '../../store/authStore';
+import { refreshTabCounts } from '../../utils/tabRefresh';
+
+const ACTIVITY_SHARE_PREFIX = '[activity_share]';
 
 interface Message {
   id: string;
@@ -119,6 +122,7 @@ export default function ChatScreen({ route, navigation }: any) {
       const data = await messageAPI.getMessages(conversationId);
       setMessages(data);
       setLoading(false);
+      refreshTabCounts();
     } catch (error) {
       console.error('Error fetching messages:', error);
       setLoading(false);
@@ -157,11 +161,61 @@ export default function ChatScreen({ route, navigation }: any) {
     });
   };
 
+  const formatActivityDate = (dateString: string) =>
+    new Date(dateString).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+
+  const formatActivityTime = (t?: string) => {
+    if (!t) return '';
+    const [h, m] = t.split(':');
+    const hr = parseInt(h);
+    return `${hr % 12 || 12}:${m} ${hr >= 12 ? 'PM' : 'AM'}`;
+  };
+
+  const renderActivityCard = (item: Message, isMyMessage: boolean) => {
+    try {
+      const activity = JSON.parse(item.content.slice(ACTIVITY_SHARE_PREFIX.length));
+      return (
+        <TouchableOpacity
+          style={[styles.activityCard, isMyMessage ? styles.myActivityCard : styles.otherActivityCard]}
+          activeOpacity={0.85}
+          onPress={() => {
+            navigation.getParent()?.navigate('Home', {
+              screen: 'ActivityDetail',
+              params: { activityId: activity.id },
+            });
+          }}
+        >
+          {activity.photo_url ? (
+            <Image source={{ uri: activity.photo_url }} style={styles.activityCardImage} contentFit="cover" />
+          ) : (
+            <View style={[styles.activityCardImage, styles.activityCardImagePlaceholder]}>
+              <Ionicons name="image-outline" size={32} color="#ccc" />
+            </View>
+          )}
+          <View style={styles.activityCardBody}>
+            <Text style={styles.activityCardTitle} numberOfLines={2}>{activity.title}</Text>
+            <Text style={styles.activityCardMeta}>
+              📅 {formatActivityDate(activity.date)}{activity.time ? '  ·  ' + formatActivityTime(activity.time) : ''}
+            </Text>
+            <Text style={styles.activityCardMeta} numberOfLines={1}>📍 {activity.location}</Text>
+            <Text style={styles.activityCardCta}>View Activity →</Text>
+          </View>
+          <Text style={[styles.messageTime, isMyMessage ? styles.myMessageTime : styles.otherMessageTime, { paddingHorizontal: 10, paddingBottom: 6 }]}>
+            {formatTime(item.created_at)}
+          </Text>
+        </TouchableOpacity>
+      );
+    } catch {
+      return null;
+    }
+  };
+
   const renderMessage = ({ item, index }: { item: Message; index: number }) => {
     const isMyMessage = item.sender_id === user?.id;
     const showAvatar =
       index === messages.length - 1 ||
       messages[index + 1]?.sender_id !== item.sender_id;
+    const isActivityShare = item.content.startsWith(ACTIVITY_SHARE_PREFIX);
 
     return (
       <View
@@ -186,30 +240,34 @@ export default function ChatScreen({ route, navigation }: any) {
         )}
         {!isMyMessage && !showAvatar && <View style={styles.avatarSpacer} />}
 
-        <View
-          style={[
-            styles.messageBubble,
-            isMyMessage ? styles.myMessageBubble : styles.otherMessageBubble,
-          ]}
-        >
-          <Text
+        {isActivityShare ? (
+          renderActivityCard(item, isMyMessage)
+        ) : (
+          <View
             style={[
-              styles.messageText,
-              isMyMessage ? styles.myMessageText : styles.otherMessageText,
-              item.content.startsWith('You have been accepted to tag along') && styles.acceptanceMessageText,
+              styles.messageBubble,
+              isMyMessage ? styles.myMessageBubble : styles.otherMessageBubble,
             ]}
           >
-            {item.content}
-          </Text>
-          <Text
-            style={[
-              styles.messageTime,
-              isMyMessage ? styles.myMessageTime : styles.otherMessageTime,
-            ]}
-          >
-            {formatTime(item.created_at)}
-          </Text>
-        </View>
+            <Text
+              style={[
+                styles.messageText,
+                isMyMessage ? styles.myMessageText : styles.otherMessageText,
+                item.content.startsWith('You have been accepted to tag along') && styles.acceptanceMessageText,
+              ]}
+            >
+              {item.content}
+            </Text>
+            <Text
+              style={[
+                styles.messageTime,
+                isMyMessage ? styles.myMessageTime : styles.otherMessageTime,
+              ]}
+            >
+              {formatTime(item.created_at)}
+            </Text>
+          </View>
+        )}
       </View>
     );
   };
@@ -428,6 +486,50 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#bbb',
     marginTop: 4,
+  },
+  activityCard: {
+    width: 240,
+    borderRadius: 14,
+    overflow: 'hidden',
+    borderWidth: 1,
+  },
+  myActivityCard: {
+    backgroundColor: '#fff',
+    borderColor: '#E8572A44',
+  },
+  otherActivityCard: {
+    backgroundColor: '#fff',
+    borderColor: '#e0e0e0',
+  },
+  activityCardImage: {
+    width: '100%',
+    height: 130,
+  },
+  activityCardImagePlaceholder: {
+    backgroundColor: '#f5f5f5',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  activityCardBody: {
+    padding: 10,
+    gap: 3,
+  },
+  activityCardTitle: {
+    fontSize: 14,
+    fontWeight: '700',
+    color: '#1a1a1a',
+    marginBottom: 2,
+  },
+  activityCardMeta: {
+    fontSize: 12,
+    color: '#555',
+    lineHeight: 18,
+  },
+  activityCardCta: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: '#E8572A',
+    marginTop: 6,
   },
   inputContainer: {
     flexDirection: 'row',

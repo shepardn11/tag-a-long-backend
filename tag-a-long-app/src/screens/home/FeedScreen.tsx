@@ -18,6 +18,7 @@ import {
   Platform,
   Animated,
   Easing,
+  PanResponder,
 } from 'react-native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useFocusEffect } from '@react-navigation/native';
@@ -79,6 +80,25 @@ export default function FeedScreen({ navigation }: Props) {
   const { user } = useAuthStore();
   const locationInitialized = useRef(false);
   const headerHeight = useRef(new Animated.Value(HEADER_HEIGHT)).current;
+  const sheetTranslateY = useRef(new Animated.Value(0)).current;
+  const sheetPanResponder = useRef(
+    PanResponder.create({
+      onStartShouldSetPanResponder: () => true,
+      onMoveShouldSetPanResponder: (_, g) => g.dy > 5,
+      onPanResponderMove: (_, g) => {
+        if (g.dy > 0) sheetTranslateY.setValue(g.dy);
+      },
+      onPanResponderRelease: (_, g) => {
+        if (g.dy > 80 || g.vy > 0.5) {
+          Animated.timing(sheetTranslateY, { toValue: 800, duration: 200, useNativeDriver: true }).start(() => {
+            setFilterVisible(false);
+          });
+        } else {
+          Animated.spring(sheetTranslateY, { toValue: 0, useNativeDriver: true, overshootClamping: true }).start();
+        }
+      },
+    })
+  ).current;
   const lastScrollY = useRef(0);
   const isHeaderVisible = useRef(true);
   const isAnimating = useRef(false);
@@ -189,6 +209,17 @@ export default function FeedScreen({ navigation }: Props) {
     fetchListings();
   }, []);
 
+  useEffect(() => {
+    if (filterVisible) {
+      Animated.spring(sheetTranslateY, {
+        toValue: 0,
+        useNativeDriver: true,
+        tension: 65,
+        friction: 11,
+      }).start();
+    }
+  }, [filterVisible]);
+
   useFocusEffect(
     useCallback(() => {
       fetchListings();
@@ -202,6 +233,7 @@ export default function FeedScreen({ navigation }: Props) {
   }, [fetchListings]);
 
   const openFilter = () => {
+    sheetTranslateY.setValue(700);
     setDraftRadius(radius);
     setDraftMinAge(minAge !== null ? String(minAge) : '');
     setDraftMaxAge(maxAge !== null ? String(maxAge) : '');
@@ -274,7 +306,7 @@ export default function FeedScreen({ navigation }: Props) {
     <Modal
       visible={filterVisible}
       transparent
-      animationType="slide"
+      animationType="none"
       onRequestClose={() => setFilterVisible(false)}
     >
       <KeyboardAvoidingView
@@ -282,8 +314,10 @@ export default function FeedScreen({ navigation }: Props) {
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       >
         <Pressable style={StyleSheet.absoluteFillObject} onPress={() => setFilterVisible(false)} />
-        <View style={styles.modalSheet}>
-          <View style={styles.sheetHandle} />
+        <Animated.View style={[styles.modalSheet, { transform: [{ translateY: sheetTranslateY }] }]}>
+          <View {...sheetPanResponder.panHandlers}>
+            <View style={styles.sheetHandle} />
+          </View>
 
           <View style={styles.sheetHeader}>
             <Text style={styles.sheetTitle}>Filters</Text>
@@ -357,7 +391,6 @@ export default function FeedScreen({ navigation }: Props) {
                       active ? prev.filter(c => c !== cat.value) : [...prev, cat.value]
                     )}
                   >
-                    <Text style={styles.categoryEmoji}>{cat.emoji} </Text>
                     <Text style={[styles.filterChipText, active && styles.filterChipTextActive]}>
                       {cat.label}
                     </Text>
@@ -370,7 +403,7 @@ export default function FeedScreen({ navigation }: Props) {
           <TouchableOpacity style={styles.applyButton} onPress={applyFilter}>
             <Text style={styles.applyButtonText}>Apply Filters</Text>
           </TouchableOpacity>
-        </View>
+        </Animated.View>
       </KeyboardAvoidingView>
     </Modal>
   );
@@ -449,7 +482,7 @@ export default function FeedScreen({ navigation }: Props) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f9fafb',
+    backgroundColor: '#fff',
   },
   header: {
     flexDirection: 'row',
@@ -517,9 +550,6 @@ const styles = StyleSheet.create({
   createButton: {
     padding: 5,
   },
-  categoryEmoji: {
-    fontSize: 13,
-  },
   modalContainer: {
     flex: 1,
     justifyContent: 'flex-end',
@@ -580,14 +610,12 @@ const styles = StyleSheet.create({
     marginBottom: 24,
   },
   filterChip: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 14,
-    paddingVertical: 8,
+    paddingHorizontal: 16,
+    paddingVertical: 10,
     borderRadius: 20,
     borderWidth: 1,
-    borderColor: '#ddd',
-    backgroundColor: '#f9fafb',
+    borderColor: '#e0e0e0',
+    backgroundColor: '#f5f5f5',
   },
   filterChipActive: {
     backgroundColor: '#E8572A',
@@ -595,8 +623,7 @@ const styles = StyleSheet.create({
   },
   filterChipText: {
     fontSize: 14,
-    fontWeight: '600',
-    color: '#555',
+    color: '#333',
   },
   filterChipTextActive: {
     color: '#fff',

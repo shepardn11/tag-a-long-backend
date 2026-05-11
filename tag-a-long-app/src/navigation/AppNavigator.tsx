@@ -9,7 +9,7 @@ import { useAuthStore } from '../store/authStore';
 import { navigationRef } from './navigationRef';
 
 const TAB_ORDER = ['Home', 'Search', 'Messages', 'MyActivities', 'Profile'] as const;
-import { ActivityIndicator, View, PanResponder } from 'react-native';
+import { ActivityIndicator, View, PanResponder, Animated, Easing } from 'react-native';
 
 // Navigators
 import AuthNavigator from './AuthNavigator';
@@ -26,6 +26,7 @@ import MyActivitiesScreen from '../screens/activities/MyActivitiesScreen';
 import ProfileScreen from '../screens/profile/ProfileScreen';
 import NotificationsScreen from '../screens/notifications/NotificationsScreen';
 import { HomeStackParamList, SearchStackParamList, ActivitiesStackParamList, MessagesStackParamList } from '../types';
+import { registerTabRefresh } from '../utils/tabRefresh';
 
 const RootStack = createNativeStackNavigator<RootStackParamList>();
 const Tab = createBottomTabNavigator<MainTabParamList>();
@@ -85,21 +86,26 @@ function MainTabs() {
   const [unreadCount, setUnreadCount] = React.useState(0);
   const [pendingRequestsCount, setPendingRequestsCount] = React.useState(0);
   const currentTabIndex = React.useRef(0);
+  const swipeX = React.useRef(new Animated.Value(0)).current;
 
   const panResponder = React.useRef(
     PanResponder.create({
       onMoveShouldSetPanResponder: (_, g) =>
-        Math.abs(g.dx) > Math.abs(g.dy) * 1.5 && Math.abs(g.dx) > 30,
+        Math.abs(g.dx) > Math.abs(g.dy) * 1.5 && Math.abs(g.dx) > 15,
+      onPanResponderMove: (_, g) => {
+        swipeX.setValue(g.dx * 0.15);
+      },
       onPanResponderRelease: (_, g) => {
-        if (g.dx < -60) {
-          const next = Math.min(currentTabIndex.current + 1, TAB_ORDER.length - 1);
-          if (next !== currentTabIndex.current)
-            navigationRef.current?.navigate(TAB_ORDER[next] as never);
-        } else if (g.dx > 60) {
-          const prev = Math.max(currentTabIndex.current - 1, 0);
-          if (prev !== currentTabIndex.current)
-            navigationRef.current?.navigate(TAB_ORDER[prev] as never);
+        const isLeft = g.dx < -50 || (g.vx < -0.5 && g.dx < -10);
+        const isRight = g.dx > 50 || (g.vx > 0.5 && g.dx > 10);
+        if (isLeft && currentTabIndex.current < TAB_ORDER.length - 1) {
+          navigationRef.current?.navigate(TAB_ORDER[currentTabIndex.current + 1] as never);
+          swipeX.setValue(20);
+        } else if (isRight && currentTabIndex.current > 0) {
+          navigationRef.current?.navigate(TAB_ORDER[currentTabIndex.current - 1] as never);
+          swipeX.setValue(-20);
         }
+        Animated.timing(swipeX, { toValue: 0, duration: 500, easing: Easing.out(Easing.cubic), useNativeDriver: true }).start();
       },
     })
   ).current;
@@ -134,15 +140,20 @@ function MainTabs() {
   React.useEffect(() => {
     fetchUnreadCount();
     fetchPendingRequests();
+    registerTabRefresh(() => {
+      fetchUnreadCount();
+      fetchPendingRequests();
+    });
     const interval = setInterval(() => {
       fetchUnreadCount();
       fetchPendingRequests();
-    }, 15000); // Every 15 seconds
+    }, 15000);
     return () => clearInterval(interval);
   }, []);
 
   return (
     <View style={{ flex: 1 }} {...panResponder.panHandlers}>
+    <Animated.View style={{ flex: 1, transform: [{ translateX: swipeX }] }}>
     <Tab.Navigator
       screenOptions={({ route }) => ({
         tabBarIcon: ({ focused, color, size }) => {
@@ -243,6 +254,7 @@ function MainTabs() {
         options={{ tabBarLabel: 'Profile' }}
       />
     </Tab.Navigator>
+    </Animated.View>
     </View>
   );
 }

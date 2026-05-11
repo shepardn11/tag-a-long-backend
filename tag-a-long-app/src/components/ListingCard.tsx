@@ -5,7 +5,6 @@ import {
   Text,
   StyleSheet,
   TouchableOpacity,
-
   Dimensions,
 } from 'react-native';
 import { Image } from 'expo-image';

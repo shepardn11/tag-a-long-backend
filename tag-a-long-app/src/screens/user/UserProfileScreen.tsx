@@ -17,6 +17,7 @@ import { SearchStackParamList, HomeStackParamList, ActivitiesStackParamList, Use
 import { Image } from 'expo-image';
 import { Ionicons } from '@expo/vector-icons';
 import { profileAPI, messageAPI } from '../../api/endpoints';
+import LightboxModal from '../../components/LightboxModal';
 
 type UserProfileScreenNavigationProp = NativeStackNavigationProp<
   SearchStackParamList | HomeStackParamList | ActivitiesStackParamList,
@@ -36,6 +37,7 @@ export default function UserProfileScreen({ navigation, route }: Props) {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isStartingConversation, setIsStartingConversation] = useState(false);
+  const [lightboxPhoto, setLightboxPhoto] = useState<string | null>(null);
 
   useEffect(() => {
     // If we have a user object, use it directly
@@ -165,10 +167,12 @@ export default function UserProfileScreen({ navigation, route }: Props) {
         {/* Profile Photo */}
         <View style={styles.photoSection}>
           {user.profile_photo_url ? (
-            <Image
-              source={{ uri: user.profile_photo_url }}
-              style={styles.profilePhoto}
-            />
+            <TouchableOpacity activeOpacity={1} onPress={() => setLightboxPhoto(user.profile_photo_url!)}>
+              <Image
+                source={{ uri: user.profile_photo_url }}
+                style={styles.profilePhoto}
+              />
+            </TouchableOpacity>
           ) : (
             <View style={styles.profilePhotoPlaceholder}>
               <Ionicons name="person" size={64} color="#999" />
@@ -233,12 +237,12 @@ export default function UserProfileScreen({ navigation, route }: Props) {
             <Text style={[styles.sectionTitle, { paddingHorizontal: 20 }]}>Photos</Text>
             <View style={styles.galleryGrid}>
               {user.photo_gallery.map((photo, index) => (
-                <View key={index} style={styles.galleryPhotoContainer}>
+                <TouchableOpacity key={index} activeOpacity={1} style={styles.galleryPhotoContainer} onPress={() => setLightboxPhoto(photo)}>
                   <Image
                     source={{ uri: photo }}
                     style={styles.galleryPhoto}
                   />
-                </View>
+                </TouchableOpacity>
               ))}
             </View>
           </View>
@@ -262,6 +266,7 @@ export default function UserProfileScreen({ navigation, route }: Props) {
           </TouchableOpacity>
         </View>
       </ScrollView>
+      <LightboxModal uri={lightboxPhoto} onClose={() => setLightboxPhoto(null)} />
     </SafeAreaView>
   );
 }

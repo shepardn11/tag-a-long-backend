@@ -26,6 +26,8 @@ import { useAuthStore } from '../../store/authStore';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import UserSelectionModal from '../../components/UserSelectionModal';
 import LightboxModal from '../../components/LightboxModal';
+import ShareActivityModal from '../../components/ShareActivityModal';
+import { refreshTabCounts } from '../../utils/tabRefresh';
 
 type ActivityDetailScreenNavigationProp = NativeStackNavigationProp<
   HomeStackParamList,
@@ -77,6 +79,7 @@ export default function ActivityDetailScreen({ navigation, route }: Props) {
   const [tempTime, setTempTime] = useState(new Date());
   const [isSaving, setIsSaving] = useState(false);
   const [lightboxPhoto, setLightboxPhoto] = useState<string | null>(null);
+  const [shareVisible, setShareVisible] = useState(false);
 
   // Check if this is the current user's own activity
   const isOwnActivity = listing?.user_id === user?.id;
@@ -138,6 +141,7 @@ export default function ActivityDetailScreen({ navigation, route }: Props) {
       await requestAPI.accept(requestId);
       Alert.alert('Accepted!', 'You accepted the Tag-A-Long request');
       await fetchRequests();
+      refreshTabCounts();
     } catch (error: any) {
       Alert.alert('Error', error.response?.data?.error?.message || 'Could not accept request');
     }
@@ -147,6 +151,7 @@ export default function ActivityDetailScreen({ navigation, route }: Props) {
     try {
       await requestAPI.decline(requestId);
       await fetchRequests();
+      refreshTabCounts();
     } catch (error: any) {
       Alert.alert('Error', error.response?.data?.error?.message || 'Could not reject request');
     }
@@ -318,18 +323,21 @@ export default function ActivityDetailScreen({ navigation, route }: Props) {
           <Ionicons name="arrow-back" size={24} color="#333" />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Activity Details</Text>
-        {isOwnActivity ? (
-          <TouchableOpacity onPress={openEdit} style={styles.editButton}>
-            <Ionicons name="pencil-outline" size={22} color="#E8572A" />
+        <View style={styles.headerRight}>
+          {isOwnActivity && (
+            <TouchableOpacity onPress={openEdit} style={styles.editButton}>
+              <Ionicons name="pencil-outline" size={22} color="#E8572A" />
+            </TouchableOpacity>
+          )}
+          <TouchableOpacity onPress={() => setShareVisible(true)} style={styles.shareButton}>
+            <Ionicons name="share-social-outline" size={22} color="#E8572A" />
           </TouchableOpacity>
-        ) : (
-          <View style={{ width: 40 }} />
-        )}
+        </View>
       </View>
 
       <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
         {/* Featured Image */}
-        <TouchableOpacity activeOpacity={0.9} onPress={() => setLightboxPhoto(listing.photo_url || listing.profile_photo_url || null)}>
+        <TouchableOpacity activeOpacity={1} onPress={() => setLightboxPhoto(listing.photo_url || listing.profile_photo_url || null)}>
           <Image
             source={{
               uri: listing.photo_url || listing.profile_photo_url || 'https://via.placeholder.com/400x300',
@@ -366,10 +374,12 @@ export default function ActivityDetailScreen({ navigation, route }: Props) {
                       onPress={() => navigation.navigate('UserProfile', { userId: request.requester.id })}
                     >
                       {request.requester.profile_photo_url ? (
-                        <Image
-                          source={{ uri: request.requester.profile_photo_url }}
-                          style={styles.requesterPhoto}
-                        />
+                        <TouchableOpacity activeOpacity={1} onPress={() => setLightboxPhoto(request.requester.profile_photo_url!)}>
+                          <Image
+                            source={{ uri: request.requester.profile_photo_url }}
+                            style={styles.requesterPhoto}
+                          />
+                        </TouchableOpacity>
                       ) : (
                         <View style={[styles.requesterPhoto, styles.requesterPhotoPlaceholder]}>
                           <Ionicons name="person" size={20} color="#999" />
@@ -429,7 +439,9 @@ export default function ActivityDetailScreen({ navigation, route }: Props) {
             }}
           >
             {listing.profile_photo_url ? (
-              <Image source={{ uri: listing.profile_photo_url }} style={styles.hostPhoto} />
+              <TouchableOpacity activeOpacity={1} onPress={() => setLightboxPhoto(listing.profile_photo_url!)}>
+                <Image source={{ uri: listing.profile_photo_url }} style={styles.hostPhoto} />
+              </TouchableOpacity>
             ) : (
               <View style={[styles.hostPhoto, styles.hostPhotoPlaceholder]}>
                 <Ionicons name="person" size={24} color="#999" />
@@ -507,10 +519,12 @@ export default function ActivityDetailScreen({ navigation, route }: Props) {
                     onPress={() => navigation.navigate('UserProfile', { userId: participant.id })}
                   >
                     {participant.profile_photo_url ? (
-                      <Image
-                        source={{ uri: participant.profile_photo_url }}
-                        style={styles.participantPhoto}
-                      />
+                      <TouchableOpacity activeOpacity={1} onPress={() => setLightboxPhoto(participant.profile_photo_url!)}>
+                        <Image
+                          source={{ uri: participant.profile_photo_url }}
+                          style={styles.participantPhoto}
+                        />
+                      </TouchableOpacity>
                     ) : (
                       <View style={[styles.participantPhoto, styles.participantPhotoPlaceholder]}>
                         <Ionicons name="person" size={20} color="#999" />
@@ -703,6 +717,7 @@ export default function ActivityDetailScreen({ navigation, route }: Props) {
       </Modal>
 
       <LightboxModal uri={lightboxPhoto} onClose={() => setLightboxPhoto(null)} />
+      <ShareActivityModal visible={shareVisible} listing={listing} onClose={() => setShareVisible(false)} />
 
       {/* Fixed Bottom Button - Only show if not own activity */}
       {!isOwnActivity && (
@@ -751,7 +766,18 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
+  headerRight: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+  },
   editButton: {
+    width: 40,
+    height: 40,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  shareButton: {
     width: 40,
     height: 40,
     justifyContent: 'center',

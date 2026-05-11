@@ -28,6 +28,7 @@ const TYPE_ICON: Record<string, { name: keyof typeof Ionicons.glyphMap; color: s
   request_received: { name: 'person-add', color: '#E8572A' },
   request_accepted: { name: 'checkmark-circle', color: '#34c759' },
   request_rejected: { name: 'close-circle', color: '#ff3b30' },
+  activity_shared: { name: 'share-social', color: '#E8572A' },
 };
 
 function timeAgo(dateStr: string): string {
@@ -90,6 +91,22 @@ export default function NotificationsScreen({ navigation }: any) {
                 username: data.other_user_username,
                 display_name: data.other_user_display_name,
                 profile_photo_url: data.other_user_photo,
+              },
+            },
+          },
+        } as never);
+      } else if (item.type === 'activity_shared' && data.conversation_id) {
+        navigationRef.navigate('Main' as never, {
+          screen: 'Messages',
+          params: {
+            screen: 'Chat',
+            params: {
+              conversationId: data.conversation_id,
+              otherUser: {
+                id: data.sender_id,
+                username: data.sender_username,
+                display_name: data.sender_display_name,
+                profile_photo_url: data.sender_photo,
               },
             },
           },

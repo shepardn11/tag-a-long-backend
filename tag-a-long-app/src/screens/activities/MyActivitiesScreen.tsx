@@ -83,7 +83,7 @@ export default function MyActivitiesScreen() {
       <View style={styles.header}>
         <Text style={styles.headerTitle}>My Activities</Text>
         <TouchableOpacity style={styles.headerCreateButton} onPress={() => navigation.navigate('CreateActivity')}>
-          <Ionicons name="add-circle-sharp" size={24} color="#E8572A" />
+          <Ionicons name="add-circle-sharp" size={28} color="#E8572A" />
         </TouchableOpacity>
       </View>
       {isLoading ? (

@@ -235,29 +235,29 @@ export default function ProfileScreen() {
                   <Image source={{ uri: user.profile_photo_url }} style={styles.profilePhoto} />
                 ) : (
                   <View style={styles.photoPlaceholder}>
-                    <Ionicons name="person" size={52} color="#ccc" />
+                    <Ionicons name="person" size={40} color="#ccc" />
                   </View>
                 )}
               </TouchableOpacity>
 
-              <Text style={styles.displayName}>{user.display_name || user.username}</Text>
-
-              <View style={styles.metaRow}>
-                {user.city && (
-                  <View style={styles.metaItem}>
-                    <Ionicons name="location-outline" size={14} color="#888" />
-                    <Text style={styles.metaText}>{user.city}</Text>
-                  </View>
-                )}
-                {user.instagram_handle && (
-                  <View style={styles.metaItem}>
-                    <Ionicons name="logo-instagram" size={14} color="#888" />
-                    <Text style={styles.metaText}>@{user.instagram_handle}</Text>
-                  </View>
-                )}
+              <View style={styles.profileInfo}>
+                <Text style={styles.displayName}>{user.display_name || user.username}</Text>
+                <View style={styles.metaRow}>
+                  {user.city && (
+                    <View style={styles.metaItem}>
+                      <Ionicons name="location-outline" size={13} color="#888" />
+                      <Text style={styles.metaText}>{user.city}</Text>
+                    </View>
+                  )}
+                  {user.instagram_handle && (
+                    <View style={styles.metaItem}>
+                      <Ionicons name="logo-instagram" size={13} color="#888" />
+                      <Text style={styles.metaText}>@{user.instagram_handle}</Text>
+                    </View>
+                  )}
+                </View>
+                {user.bio && <Text style={styles.bio}>{user.bio}</Text>}
               </View>
-
-              {user.bio && <Text style={styles.bio}>{user.bio}</Text>}
             </View>
 
             <View style={styles.divider} />
@@ -512,30 +512,36 @@ const styles = StyleSheet.create({
   editIcon: { padding: 4 },
   scrollView: { flex: 1 },
   scrollContent: { paddingBottom: 40 },
-  heroSection: { alignItems: 'center', paddingTop: 32, paddingHorizontal: 24, paddingBottom: 28 },
+  heroSection: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    paddingTop: 20,
+    paddingHorizontal: 20,
+    paddingBottom: 20,
+  },
   photoContainer: {
-    marginBottom: 16,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 8,
     elevation: 4,
   },
-  profilePhoto: { width: 110, height: 110, borderRadius: 55, borderWidth: 3, borderColor: '#E8572A' },
+  profilePhoto: { width: 88, height: 88, borderRadius: 44, borderWidth: 2.5, borderColor: '#E8572A' },
   photoPlaceholder: {
-    width: 110, height: 110, borderRadius: 55, backgroundColor: '#f5f5f5',
+    width: 88, height: 88, borderRadius: 44, backgroundColor: '#f5f5f5',
     justifyContent: 'center', alignItems: 'center', borderWidth: 2, borderColor: '#e0e0e0',
   },
-  displayName: { fontSize: 32, fontWeight: '700', color: '#1a1a1a', marginBottom: 4, letterSpacing: -0.5 },
-  metaRow: { flexDirection: 'row', gap: 16, marginBottom: 14 },
+  profileInfo: { flex: 1, paddingLeft: 16, paddingTop: 2 },
+  displayName: { fontSize: 22, fontWeight: '700', color: '#1a1a1a', marginBottom: 5, letterSpacing: -0.3 },
+  metaRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 10, marginBottom: 8 },
   metaItem: { flexDirection: 'row', alignItems: 'center', gap: 4 },
   metaText: { fontSize: 13, color: '#888' },
-  bio: { fontSize: 15, color: '#444', textAlign: 'center', lineHeight: 22, maxWidth: 300 },
+  bio: { fontSize: 14, color: '#444', lineHeight: 20 },
   divider: { height: 1, backgroundColor: '#f0f0f0' },
-  gallerySection: { paddingTop: 24 },
-  galleryTitle: { fontSize: 16, fontWeight: '600', color: '#1a1a1a', marginBottom: 14, letterSpacing: 0.2, paddingHorizontal: 20 },
+  gallerySection: { paddingTop: 16 },
+  galleryTitle: { fontSize: 16, fontWeight: '600', color: '#1a1a1a', marginBottom: 10, letterSpacing: 0.2, paddingHorizontal: 20 },
   galleryGrid: { flexDirection: 'row', flexWrap: 'wrap' },
-  galleryPhotoContainer: { width: '50%', aspectRatio: 1, overflow: 'hidden', backgroundColor: '#f5f5f5', padding: 1 },
+  galleryPhotoContainer: { width: '33.33%', aspectRatio: 1, overflow: 'hidden', backgroundColor: '#f5f5f5', padding: 1 },
   galleryPhoto: { width: '100%', height: '100%' },
   logoutButton: {
     flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8,

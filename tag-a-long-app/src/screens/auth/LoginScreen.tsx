@@ -54,7 +54,7 @@ export default function LoginScreen({ navigation }: Props) {
       >
         {/* Logo/Title */}
         <View style={styles.header}>
-          <Text style={styles.title}>Tag-A-Long</Text>
+          <Text style={styles.title}>Tag A Long</Text>
           <Text style={styles.subtitle}>Find your next adventure</Text>
         </View>
 
@@ -127,7 +127,7 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 36,
-    fontWeight: 'bold',
+    fontFamily: 'Lora_600SemiBold_Italic',
     color: '#E8572A',
     marginBottom: 10,
   },

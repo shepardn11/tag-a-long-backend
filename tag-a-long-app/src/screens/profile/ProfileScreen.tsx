@@ -264,7 +264,6 @@ export default function ProfileScreen() {
 
             {user.photo_gallery && user.photo_gallery.length > 0 && (
               <View style={styles.gallerySection}>
-                <Text style={styles.galleryTitle}>Photos</Text>
                 <View style={styles.galleryGrid}>
                   {user.photo_gallery.map((photoUrl: string, index: number) => (
                     <TouchableOpacity key={index} style={styles.galleryPhotoContainer} onPress={() => setLightboxPhoto(photoUrl)} activeOpacity={0.85}>
@@ -538,7 +537,7 @@ const styles = StyleSheet.create({
   metaText: { fontSize: 13, color: '#888' },
   bio: { fontSize: 14, color: '#444', lineHeight: 20 },
   divider: { height: 1, backgroundColor: '#f0f0f0' },
-  gallerySection: { paddingTop: 16 },
+  gallerySection: { paddingTop: 6 },
   galleryTitle: { fontSize: 16, fontWeight: '600', color: '#1a1a1a', marginBottom: 10, letterSpacing: 0.2, paddingHorizontal: 20 },
   galleryGrid: { flexDirection: 'row', flexWrap: 'wrap' },
   galleryPhotoContainer: { width: '50%', aspectRatio: 1, overflow: 'hidden', backgroundColor: '#f5f5f5', padding: 1 },

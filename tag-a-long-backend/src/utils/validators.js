@@ -39,7 +39,7 @@ const createListingSchema = Joi.object({
   // New structured fields
   title: Joi.string().min(3).max(200).required(),
   description: Joi.string().min(10).max(500).required(),
-  category: Joi.string().valid('sports', 'food', 'entertainment', 'outdoor', 'fitness', 'social', 'music', 'gaming', 'travel', 'arts', 'nightlife', 'wellness', 'volunteering', 'learning', 'pets', 'other').required(),
+  category: Joi.string().valid('sports', 'food', 'entertainment', 'outdoor', 'fitness', 'social', 'music', 'gaming', 'travel', 'arts', 'nightlife', 'wellness', 'volunteering', 'learning', 'pets', 'dating', 'other').required(),
   location: Joi.string().min(2).max(200).required(),
   date: Joi.date().min('now').required(),
   time: Joi.string().pattern(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/).required(),

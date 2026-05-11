@@ -232,6 +232,7 @@ export default function SearchScreen({ navigation }: Props) {
           renderItem={activeTab === 'activities' ? renderActivityCard : renderUserCard}
           contentContainerStyle={styles.listContent}
           ListEmptyComponent={renderEmpty}
+          keyboardShouldPersistTaps="handled"
         />
       )}
     </SafeAreaView>

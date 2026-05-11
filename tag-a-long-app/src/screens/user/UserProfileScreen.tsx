@@ -1,4 +1,4 @@
-﻿// User Profile Screen - View another user's profile
+// User Profile Screen - View another user's profile
 import React, { useState, useEffect } from 'react';
 import {
   View,
@@ -121,7 +121,7 @@ export default function UserProfileScreen({ navigation, route }: Props) {
           <View style={styles.placeholder} />
         </View>
         <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color="#D4AF37" />
+          <ActivityIndicator size="large" color="#E8572A" />
           <Text style={styles.loadingText}>Loading profile...</Text>
         </View>
       </SafeAreaView>
@@ -180,7 +180,7 @@ export default function UserProfileScreen({ navigation, route }: Props) {
             <View style={styles.nameRow}>
               <Text style={styles.displayName}>{user.display_name}</Text>
               {user.is_premium && (
-                <Ionicons name="checkmark-circle" size={24} color="#D4AF37" />
+                <Ionicons name="checkmark-circle" size={24} color="#E8572A" />
               )}
             </View>
             <Text style={styles.username}>@{user.username}</Text>
@@ -192,7 +192,7 @@ export default function UserProfileScreen({ navigation, route }: Props) {
           {/* Location */}
           {user.city && (
             <View style={styles.infoRow}>
-              <Ionicons name="location" size={20} color="#D4AF37" />
+              <Ionicons name="location" size={20} color="#E8572A" />
               <Text style={styles.infoText}>{user.city}</Text>
             </View>
           )}
@@ -200,7 +200,7 @@ export default function UserProfileScreen({ navigation, route }: Props) {
           {/* Join Date */}
           {user.created_at && (
             <View style={styles.infoRow}>
-              <Ionicons name="calendar" size={20} color="#D4AF37" />
+              <Ionicons name="calendar" size={20} color="#E8572A" />
               <Text style={styles.infoText}>
                 Joined {new Date(user.created_at).toLocaleDateString('en-US', {
                   month: 'long',
@@ -213,7 +213,7 @@ export default function UserProfileScreen({ navigation, route }: Props) {
           {/* Instagram */}
           {user.instagram_handle && (
             <View style={styles.infoRow}>
-              <Ionicons name="logo-instagram" size={20} color="#D4AF37" />
+              <Ionicons name="logo-instagram" size={20} color="#E8572A" />
               <Text style={styles.infoText}>@{user.instagram_handle}</Text>
             </View>
           )}
@@ -321,7 +321,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   retryButton: {
-    backgroundColor: '#D4AF37',
+    backgroundColor: '#E8572A',
     paddingHorizontal: 24,
     paddingVertical: 12,
     borderRadius: 24,
@@ -430,7 +430,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#D4AF37',
+    backgroundColor: '#E8572A',
     paddingVertical: 14,
     borderRadius: 12,
     gap: 8,

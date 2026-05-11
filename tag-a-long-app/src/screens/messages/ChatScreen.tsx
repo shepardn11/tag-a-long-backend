@@ -1,4 +1,4 @@
-﻿// Chat Screen - Individual conversation
+// Chat Screen - Individual conversation
 import React, { useState, useEffect, useRef } from 'react';
 import {
   View,
@@ -217,7 +217,7 @@ export default function ChatScreen({ route, navigation }: any) {
   if (loading) {
     return (
       <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="#D4AF37" />
+        <ActivityIndicator size="large" color="#E8572A" />
       </View>
     );
   }
@@ -380,7 +380,7 @@ const styles = StyleSheet.create({
     borderRadius: 16,
   },
   myMessageBubble: {
-    backgroundColor: '#D4AF37',
+    backgroundColor: '#E8572A',
     borderBottomRightRadius: 4,
   },
   otherMessageBubble: {
@@ -453,7 +453,7 @@ const styles = StyleSheet.create({
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: '#D4AF37',
+    backgroundColor: '#E8572A',
     alignItems: 'center',
     justifyContent: 'center',
   },

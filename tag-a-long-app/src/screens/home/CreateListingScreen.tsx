@@ -1,4 +1,4 @@
-﻿// Create Listing Screen - Create new activity post
+// Create Listing Screen - Create new activity post
 import React, { useState } from 'react';
 import {
   View,
@@ -133,22 +133,23 @@ export default function CreateListingScreen({ navigation }: Props) {
 
   // Categories for activity listings
   const categories = [
-    { value: 'sports', label: '⚽ Sports', icon: 'football' },
-    { value: 'food', label: '🍽️ Food & Dining', icon: 'restaurant' },
-    { value: 'entertainment', label: '🎬 Entertainment', icon: 'film' },
-    { value: 'outdoor', label: '🏞️ Outdoors', icon: 'leaf' },
-    { value: 'fitness', label: '💪 Fitness', icon: 'barbell' },
-    { value: 'social', label: '👥 Social', icon: 'people' },
-    { value: 'music', label: '🎵 Music', icon: 'musical-notes' },
-    { value: 'gaming', label: '🎮 Gaming', icon: 'game-controller' },
-    { value: 'travel', label: '🚗 Travel', icon: 'car' },
-    { value: 'arts', label: '🎨 Arts & Culture', icon: 'color-palette' },
-    { value: 'nightlife', label: '🌙 Nightlife', icon: 'moon' },
-    { value: 'wellness', label: '🧘 Wellness', icon: 'heart' },
-    { value: 'volunteering', label: '🤝 Volunteering', icon: 'hand-left' },
-    { value: 'learning', label: '📚 Learning', icon: 'book' },
-    { value: 'pets', label: '🐾 Pets', icon: 'paw' },
-    { value: 'other', label: '✨ Other', icon: 'apps' },
+    { value: 'sports', label: 'Sports', icon: 'football' },
+    { value: 'food', label: 'Food & Dining', icon: 'restaurant' },
+    { value: 'entertainment', label: 'Entertainment', icon: 'film' },
+    { value: 'outdoor', label: 'Outdoors', icon: 'leaf' },
+    { value: 'fitness', label: 'Fitness', icon: 'barbell' },
+    { value: 'social', label: 'Social', icon: 'people' },
+    { value: 'music', label: 'Music', icon: 'musical-notes' },
+    { value: 'gaming', label: 'Gaming', icon: 'game-controller' },
+    { value: 'travel', label: 'Travel', icon: 'car' },
+    { value: 'arts', label: 'Arts & Culture', icon: 'color-palette' },
+    { value: 'nightlife', label: 'Nightlife', icon: 'moon' },
+    { value: 'wellness', label: 'Wellness', icon: 'heart' },
+    { value: 'volunteering', label: 'Volunteering', icon: 'hand-left' },
+    { value: 'learning', label: 'Learning', icon: 'book' },
+    { value: 'pets', label: 'Pets', icon: 'paw' },
+    { value: 'dating', label: 'Dating', icon: 'heart-circle' },
+    { value: 'other', label: 'Other', icon: 'apps' },
   ];
 
   const handleDateChange = (event: any, selectedDate?: Date) => {
@@ -345,7 +346,7 @@ export default function CreateListingScreen({ navigation }: Props) {
           longitude = pos.coords.longitude;
         }
       } catch {
-        // GPS unavailable — listing still saves, just won't appear in radius feed
+        // GPS unavailable � listing still saves, just won't appear in radius feed
       }
 
       const listingData: any = {
@@ -476,7 +477,7 @@ export default function CreateListingScreen({ navigation }: Props) {
                   onPress={takePhoto}
                   disabled={isLoading}
                 >
-                  <Ionicons name="camera" size={24} color="#D4AF37" />
+                  <Ionicons name="camera" size={24} color="#E8572A" />
                   <Text style={styles.photoButtonText}>Take Photo</Text>
                 </TouchableOpacity>
                 <TouchableOpacity
@@ -484,7 +485,7 @@ export default function CreateListingScreen({ navigation }: Props) {
                   onPress={pickImage}
                   disabled={isLoading}
                 >
-                  <Ionicons name="images" size={24} color="#D4AF37" />
+                  <Ionicons name="images" size={24} color="#E8572A" />
                   <Text style={styles.photoButtonText}>Choose from Library</Text>
                 </TouchableOpacity>
               </View>
@@ -513,7 +514,7 @@ export default function CreateListingScreen({ navigation }: Props) {
               {/* Date Button/Picker */}
               {Platform.OS === 'web' ? (
                 <View style={styles.dateTimeButton}>
-                  <Ionicons name="calendar-outline" size={24} color="#D4AF37" />
+                  <Ionicons name="calendar-outline" size={24} color="#E8572A" />
                   <View style={styles.buttonTextContainer}>
                     <Text style={styles.buttonLabel}>Date</Text>
                     <input
@@ -552,7 +553,7 @@ export default function CreateListingScreen({ navigation }: Props) {
                   }}
                   disabled={isLoading}
                 >
-                  <Ionicons name="calendar-outline" size={24} color="#D4AF37" />
+                  <Ionicons name="calendar-outline" size={24} color="#E8572A" />
                   <View style={styles.buttonTextContainer}>
                     <Text style={styles.buttonLabel}>Date</Text>
                     <Text style={styles.buttonValue}>{formatDate(date)}</Text>
@@ -563,7 +564,7 @@ export default function CreateListingScreen({ navigation }: Props) {
               {/* Time Button/Picker */}
               {Platform.OS === 'web' ? (
                 <View style={styles.dateTimeButton}>
-                  <Ionicons name="time-outline" size={24} color="#D4AF37" />
+                  <Ionicons name="time-outline" size={24} color="#E8572A" />
                   <View style={styles.buttonTextContainer}>
                     <Text style={styles.buttonLabel}>Time</Text>
                     <input
@@ -604,7 +605,7 @@ export default function CreateListingScreen({ navigation }: Props) {
                   }}
                   disabled={isLoading}
                 >
-                  <Ionicons name="time-outline" size={24} color="#D4AF37" />
+                  <Ionicons name="time-outline" size={24} color="#E8572A" />
                   <View style={styles.buttonTextContainer}>
                     <Text style={styles.buttonLabel}>Time</Text>
                     <Text style={styles.buttonValue}>{formatTime(time)}</Text>
@@ -630,7 +631,7 @@ export default function CreateListingScreen({ navigation }: Props) {
                     display="inline"
                     onChange={handleDateChange}
                     minimumDate={new Date()}
-                    accentColor="#D4AF37"
+                    accentColor="#E8572A"
                   />
                   <View style={styles.pickerFooter}>
                     <TouchableOpacity onPress={confirmDate}>
@@ -878,8 +879,8 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   categoryButtonActive: {
-    backgroundColor: '#D4AF37',
-    borderColor: '#D4AF37',
+    backgroundColor: '#E8572A',
+    borderColor: '#E8572A',
   },
   categoryLabel: {
     fontSize: 14,
@@ -944,7 +945,7 @@ const styles = StyleSheet.create({
     marginTop: 5,
   },
   createButton: {
-    backgroundColor: '#D4AF37',
+    backgroundColor: '#E8572A',
     borderRadius: 10,
     padding: 16,
     flexDirection: 'row',
@@ -974,12 +975,12 @@ const styles = StyleSheet.create({
     padding: 15,
     borderRadius: 10,
     borderWidth: 1,
-    borderColor: '#D4AF37',
+    borderColor: '#E8572A',
   },
   photoButtonText: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#D4AF37',
+    color: '#E8572A',
     marginLeft: 8,
   },
   photoPreview: {
@@ -1031,7 +1032,7 @@ const styles = StyleSheet.create({
   taggedUserName: {
     fontSize: 14,
     fontWeight: '500',
-    color: '#D4AF37',
+    color: '#E8572A',
   },
   modalOverlay: {
     flex: 1,
@@ -1055,7 +1056,7 @@ const styles = StyleSheet.create({
   },
   pickerButton: {
     fontSize: 17,
-    color: '#D4AF37',
+    color: '#E8572A',
   },
   pickerButtonDone: {
     fontWeight: '600',

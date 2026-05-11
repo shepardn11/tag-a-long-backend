@@ -1,4 +1,4 @@
-﻿// App Navigator - Main navigation structure with bottom tabs
+// App Navigator - Main navigation structure with bottom tabs
 import React, { useEffect } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
@@ -162,7 +162,7 @@ function MainTabs() {
 
           return <Ionicons name={iconName} size={24} color={color} />;
         },
-        tabBarActiveTintColor: '#D4AF37',
+        tabBarActiveTintColor: '#E8572A',
         tabBarInactiveTintColor: 'gray',
         tabBarShowLabel: false,
         tabBarStyle: {
@@ -170,6 +170,13 @@ function MainTabs() {
           paddingTop: 8,
           paddingHorizontal: 20,
           height: 68,
+          backgroundColor: '#fff',
+          borderTopWidth: 0,
+          shadowColor: '#000',
+          shadowOffset: { width: 0, height: -3 },
+          shadowOpacity: 0.07,
+          shadowRadius: 10,
+          elevation: 12,
         },
         tabBarItemStyle: {
           marginHorizontal: 4,
@@ -251,7 +258,7 @@ export default function AppNavigator() {
   if (isLoading) {
     return (
       <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-        <ActivityIndicator size="large" color="#D4AF37" />
+        <ActivityIndicator size="large" color="#E8572A" />
       </View>
     );
   }

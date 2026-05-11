@@ -1,4 +1,4 @@
-﻿// Auth Store - Zustand state management for authentication
+// Auth Store - Zustand state management for authentication
 import { create } from 'zustand';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { User, LoginCredentials, SignupData } from '../types';

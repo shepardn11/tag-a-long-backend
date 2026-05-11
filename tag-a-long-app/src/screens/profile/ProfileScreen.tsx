@@ -1,4 +1,4 @@
-﻿// Profile Screen - User profile and settings
+// Profile Screen - User profile and settings
 import React, { useCallback, useState } from 'react';
 import {
   View,
@@ -6,7 +6,6 @@ import {
   StyleSheet,
   SafeAreaView,
   TouchableOpacity,
-
   ScrollView,
   Modal,
   TextInput,
@@ -16,7 +15,9 @@ import {
   Platform,
   Linking,
 } from 'react-native';
+
 import { useFocusEffect } from '@react-navigation/native';
+import LightboxModal from '../../components/LightboxModal';
 import { useAuthStore } from '../../store/authStore';
 import { profileAPI, safetyAPI } from '../../api/endpoints';
 import { Image } from 'expo-image';
@@ -39,6 +40,7 @@ export default function ProfileScreen() {
   const [deleteVisible, setDeleteVisible] = useState(false);
   const [deletePassword, setDeletePassword] = useState('');
   const [isDeleting, setIsDeleting] = useState(false);
+  const [lightboxPhoto, setLightboxPhoto] = useState<string | null>(null);
 
   useFocusEffect(
     useCallback(() => {
@@ -216,7 +218,7 @@ export default function ProfileScreen() {
       <View style={styles.header}>
         <Text style={styles.title}>Profile</Text>
         <TouchableOpacity style={styles.editIcon} onPress={openEdit}>
-          <Ionicons name="pencil-outline" size={22} color="#D4AF37" />
+          <Ionicons name="pencil-outline" size={22} color="#E8572A" />
         </TouchableOpacity>
       </View>
 
@@ -224,7 +226,11 @@ export default function ProfileScreen() {
         {user && (
           <>
             <View style={styles.heroSection}>
-              <View style={styles.photoContainer}>
+              <TouchableOpacity
+                style={styles.photoContainer}
+                onPress={() => user.profile_photo_url && setLightboxPhoto(user.profile_photo_url)}
+                activeOpacity={0.85}
+              >
                 {user.profile_photo_url ? (
                   <Image source={{ uri: user.profile_photo_url }} style={styles.profilePhoto} />
                 ) : (
@@ -232,7 +238,7 @@ export default function ProfileScreen() {
                     <Ionicons name="person" size={52} color="#ccc" />
                   </View>
                 )}
-              </View>
+              </TouchableOpacity>
 
               <Text style={styles.displayName}>{user.display_name || user.username}</Text>
 
@@ -261,9 +267,9 @@ export default function ProfileScreen() {
                 <Text style={styles.galleryTitle}>Photos</Text>
                 <View style={styles.galleryGrid}>
                   {user.photo_gallery.map((photoUrl: string, index: number) => (
-                    <View key={index} style={styles.galleryPhotoContainer}>
+                    <TouchableOpacity key={index} style={styles.galleryPhotoContainer} onPress={() => setLightboxPhoto(photoUrl)} activeOpacity={0.85}>
                       <Image source={{ uri: photoUrl }} style={styles.galleryPhoto} contentFit="cover" />
-                    </View>
+                    </TouchableOpacity>
                   ))}
                 </View>
               </View>
@@ -289,7 +295,7 @@ export default function ProfileScreen() {
               <Text style={styles.modalTitle}>Edit Profile</Text>
               <TouchableOpacity onPress={handleSave} disabled={isSaving}>
                 {isSaving ? (
-                  <ActivityIndicator size="small" color="#D4AF37" />
+                  <ActivityIndicator size="small" color="#E8572A" />
                 ) : (
                   <Text style={styles.modalSave}>Save</Text>
                 )}
@@ -301,7 +307,7 @@ export default function ProfileScreen() {
               <Text style={styles.modalSectionTitle}>Profile Photo</Text>
               <TouchableOpacity style={styles.profilePhotoEdit} onPress={handleEditProfilePhoto} disabled={uploadingProfile}>
                 {uploadingProfile ? (
-                  <ActivityIndicator color="#D4AF37" />
+                  <ActivityIndicator color="#E8572A" />
                 ) : user?.profile_photo_url ? (
                   <>
                     <Image source={{ uri: user.profile_photo_url }} style={styles.editProfilePhoto} />
@@ -311,7 +317,7 @@ export default function ProfileScreen() {
                   </>
                 ) : (
                   <View style={styles.editProfilePhotoPlaceholder}>
-                    <Ionicons name="camera-outline" size={32} color="#D4AF37" />
+                    <Ionicons name="camera-outline" size={32} color="#E8572A" />
                     <Text style={styles.editPhotoPlaceholderText}>Add Photo</Text>
                   </View>
                 )}
@@ -348,7 +354,7 @@ export default function ProfileScreen() {
                   <View key={index} style={styles.editGalleryBox}>
                     {uploadingIndex === index ? (
                       <View style={styles.editGalleryPlaceholder}>
-                        <ActivityIndicator color="#D4AF37" />
+                        <ActivityIndicator color="#E8572A" />
                       </View>
                     ) : photo ? (
                       <>
@@ -362,7 +368,7 @@ export default function ProfileScreen() {
                       </>
                     ) : (
                       <TouchableOpacity style={styles.editGalleryPlaceholder} onPress={() => handleEditGalleryPhoto(index)}>
-                        <Ionicons name="add" size={28} color="#D4AF37" />
+                        <Ionicons name="add" size={28} color="#E8572A" />
                       </TouchableOpacity>
                     )}
                   </View>
@@ -392,7 +398,7 @@ export default function ProfileScreen() {
                 <TouchableOpacity onPress={() => Linking.openURL('https://maddening-sodium-7eb.notion.site/Tag-A-Long-Privacy-Policy-35843955dac980749da8ef205ab7a8d6')}>
                   <Text style={styles.legalLink}>Privacy Policy</Text>
                 </TouchableOpacity>
-                <Text style={styles.legalDot}>Â·</Text>
+                <Text style={styles.legalDot}>{'�'}</Text>
                 <TouchableOpacity onPress={() => Linking.openURL('https://maddening-sodium-7eb.notion.site/Tag-A-Long-Terms-of-Service-35843955dac98002853bcc3efa059da6')}>
                   <Text style={styles.legalLink}>Terms of Service</Text>
                 </TouchableOpacity>
@@ -445,6 +451,8 @@ export default function ProfileScreen() {
         </SafeAreaView>
       </Modal>
 
+      <LightboxModal uri={lightboxPhoto} onClose={() => setLightboxPhoto(null)} />
+
       {/* Blocked Users Modal */}
       <Modal visible={blockedVisible} animationType="slide" presentationStyle="pageSheet">
         <SafeAreaView style={{ flex: 1, backgroundColor: '#fff' }}>
@@ -494,12 +502,13 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     paddingHorizontal: 20,
-    paddingVertical: 15,
+    paddingTop: 20,
+    paddingBottom: 16,
     backgroundColor: '#fff',
     borderBottomWidth: 1,
     borderBottomColor: '#f0f0f0',
   },
-  title: { fontSize: 24, fontWeight: 'bold', color: '#D4AF37' },
+  title: { fontSize: 22, fontFamily: 'Lora_600SemiBold_Italic', color: '#E8572A' },
   editIcon: { padding: 4 },
   scrollView: { flex: 1 },
   scrollContent: { paddingBottom: 40 },
@@ -512,7 +521,7 @@ const styles = StyleSheet.create({
     shadowRadius: 8,
     elevation: 4,
   },
-  profilePhoto: { width: 110, height: 110, borderRadius: 55, borderWidth: 3, borderColor: '#D4AF37' },
+  profilePhoto: { width: 110, height: 110, borderRadius: 55, borderWidth: 3, borderColor: '#E8572A' },
   photoPlaceholder: {
     width: 110, height: 110, borderRadius: 55, backgroundColor: '#f5f5f5',
     justifyContent: 'center', alignItems: 'center', borderWidth: 2, borderColor: '#e0e0e0',
@@ -525,8 +534,8 @@ const styles = StyleSheet.create({
   divider: { height: 1, backgroundColor: '#f0f0f0' },
   gallerySection: { paddingTop: 24 },
   galleryTitle: { fontSize: 16, fontWeight: '600', color: '#1a1a1a', marginBottom: 14, letterSpacing: 0.2, paddingHorizontal: 20 },
-  galleryGrid: { flexDirection: 'column', gap: 12 },
-  galleryPhotoContainer: { width: '100%', aspectRatio: 1, overflow: 'hidden', backgroundColor: '#f5f5f5' },
+  galleryGrid: { flexDirection: 'row', flexWrap: 'wrap' },
+  galleryPhotoContainer: { width: '50%', aspectRatio: 1, overflow: 'hidden', backgroundColor: '#f5f5f5', padding: 1 },
   galleryPhoto: { width: '100%', height: '100%' },
   logoutButton: {
     flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8,
@@ -536,7 +545,7 @@ const styles = StyleSheet.create({
   logoutButtonText: { color: '#888', fontSize: 15, fontWeight: '500' },
   deleteAccountButton: {
     flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6,
-    marginTop: 300, paddingVertical: 12,
+    marginTop: 32, paddingVertical: 12,
   },
   deleteAccountText: { color: '#ef4444', fontSize: 14, fontWeight: '500' },
   blockedUsersButton: {
@@ -581,14 +590,14 @@ const styles = StyleSheet.create({
   },
   modalTitle: { fontSize: 17, fontWeight: '600', color: '#1a1a1a' },
   modalCancel: { fontSize: 16, color: '#888' },
-  modalSave: { fontSize: 16, fontWeight: '600', color: '#D4AF37' },
+  modalSave: { fontSize: 16, fontWeight: '600', color: '#E8572A' },
   modalContent: { padding: 20, paddingBottom: 40 },
   modalSectionTitle: { fontSize: 15, fontWeight: '600', color: '#333', marginTop: 24, marginBottom: 12 },
 
   profilePhotoEdit: {
     width: 110, height: 110, borderRadius: 55, alignSelf: 'center',
     overflow: 'hidden', backgroundColor: '#f5f5f5', justifyContent: 'center', alignItems: 'center',
-    borderWidth: 2, borderColor: '#D4AF37',
+    borderWidth: 2, borderColor: '#E8572A',
   },
   editProfilePhoto: { width: '100%', height: '100%' },
   editPhotoOverlay: {
@@ -596,7 +605,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(0,0,0,0.45)', justifyContent: 'center', alignItems: 'center',
   },
   editProfilePhotoPlaceholder: { alignItems: 'center', gap: 4 },
-  editPhotoPlaceholderText: { fontSize: 12, color: '#D4AF37', fontWeight: '500' },
+  editPhotoPlaceholderText: { fontSize: 12, color: '#E8572A', fontWeight: '500' },
 
   bioInput: {
     borderWidth: 1, borderColor: '#e0e0e0', borderRadius: 10, padding: 12,

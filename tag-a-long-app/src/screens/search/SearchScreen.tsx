@@ -132,7 +132,7 @@ export default function SearchScreen({ navigation }: Props) {
         <View style={styles.userInfo}>
           <View style={styles.nameRow}>
             <Text style={styles.displayName}>{item.display_name}</Text>
-            {item.is_premium && <Ionicons name="checkmark-circle" size={15} color="#D4AF37" />}
+            {item.is_premium && <Ionicons name="checkmark-circle" size={15} color="#E8572A" />}
           </View>
           <Text style={styles.username}>@{item.username}</Text>
           {item.city && (
@@ -223,7 +223,7 @@ export default function SearchScreen({ navigation }: Props) {
 
       {isSearching ? (
         <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color="#D4AF37" />
+          <ActivityIndicator size="large" color="#E8572A" />
         </View>
       ) : (
         <FlatList
@@ -239,15 +239,16 @@ export default function SearchScreen({ navigation }: Props) {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#f9fafb' },
+  container: { flex: 1, backgroundColor: '#fff' },
   header: {
     paddingHorizontal: 20,
-    paddingVertical: 15,
+    paddingTop: 20,
+    paddingBottom: 16,
     borderBottomWidth: 1,
-    borderBottomColor: '#e0e0e0',
+    borderBottomColor: '#f0f0f0',
     backgroundColor: '#fff',
   },
-  headerTitle: { fontSize: 22, fontWeight: 'bold', color: '#D4AF37' },
+  headerTitle: { fontSize: 22, fontFamily: 'Lora_600SemiBold_Italic', color: '#E8572A' },
   searchContainer: { padding: 16, backgroundColor: '#fff' },
   searchBar: {
     flexDirection: 'row',
@@ -271,9 +272,9 @@ const styles = StyleSheet.create({
     borderBottomWidth: 2,
     borderBottomColor: 'transparent',
   },
-  tabActive: { borderBottomColor: '#D4AF37' },
+  tabActive: { borderBottomColor: '#E8572A' },
   tabText: { fontSize: 15, color: '#999', fontWeight: '500' },
-  tabTextActive: { color: '#D4AF37', fontWeight: '600' },
+  tabTextActive: { color: '#E8572A', fontWeight: '600' },
   loadingContainer: { flex: 1, justifyContent: 'center', alignItems: 'center' },
   listContent: { padding: 16, flexGrow: 1 },
   card: {
@@ -298,7 +299,7 @@ const styles = StyleSheet.create({
   activityTitle: { fontSize: 15, fontWeight: '600', color: '#333', marginBottom: 2 },
   activityCategory: {
     fontSize: 12,
-    color: '#D4AF37',
+    color: '#E8572A',
     fontWeight: '500',
     textTransform: 'capitalize',
     marginBottom: 4,

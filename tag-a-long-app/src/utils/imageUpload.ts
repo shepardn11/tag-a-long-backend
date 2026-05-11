@@ -1,4 +1,4 @@
-﻿// Image Upload Utility - Uploads via backend to keep service role key server-side
+// Image Upload Utility - Uploads via backend to keep service role key server-side
 import apiClient from '../api/client';
 
 const api = apiClient.getInstance();
@@ -27,7 +27,7 @@ export const uploadImage = async (
   return response.data.data.url;
 };
 
-// Kept for API compatibility â€” no-op since storage cleanup is handled server-side
+// Kept for API compatibility — no-op since storage cleanup is handled server-side
 export const deleteImage = async (
   filePath: string,
   bucketName: string = 'profile-photos'

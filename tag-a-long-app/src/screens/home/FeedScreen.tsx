@@ -56,6 +56,7 @@ const CATEGORIES = [
   { value: 'volunteering',  label: 'Volunteering',   emoji: '🤝' },
   { value: 'learning',      label: 'Learning',       emoji: '📚' },
   { value: 'pets',          label: 'Pets',           emoji: '🐾' },
+  { value: 'dating',        label: 'Dating',         emoji: '❤️' },
   { value: 'other',         label: 'Other',          emoji: '✨' },
 ];
 
@@ -243,8 +244,14 @@ export default function FeedScreen({ navigation }: Props) {
   const renderHeader = () => (
     <Animated.View style={{ height: headerHeight, overflow: 'hidden' }}>
       <View style={styles.header}>
+        <View style={styles.headerLeft}>
+          <TouchableOpacity style={styles.headerIcon} onPress={openFilter}>
+            <Ionicons name="options-outline" size={26} color="#333" />
+            {filtersActive && <View style={styles.filterDot} />}
+          </TouchableOpacity>
+        </View>
         <Text style={styles.headerTitle}>Tag A Long</Text>
-        <View style={styles.headerActions}>
+        <View style={styles.headerRight}>
           <TouchableOpacity style={styles.headerIcon} onPress={() => navigation.navigate('Notifications')}>
             <Ionicons name="notifications-outline" size={26} color="#333" />
             {unreadNotifications > 0 && (
@@ -255,12 +262,8 @@ export default function FeedScreen({ navigation }: Props) {
               </View>
             )}
           </TouchableOpacity>
-          <TouchableOpacity style={styles.headerIcon} onPress={openFilter}>
-            <Ionicons name="options-outline" size={26} color="#333" />
-            {filtersActive && <View style={styles.filterDot} />}
-          </TouchableOpacity>
           <TouchableOpacity style={styles.createButton} onPress={() => navigation.navigate('CreateActivity')}>
-            <Ionicons name="add-circle-sharp" size={28} color="#D4AF37" />
+            <Ionicons name="add-circle-sharp" size={28} color="#E8572A" />
           </TouchableOpacity>
         </View>
       </View>
@@ -293,7 +296,7 @@ export default function FeedScreen({ navigation }: Props) {
             <Text style={styles.sectionLabel}>Distance</Text>
             {!userCoords && (
               <TouchableOpacity style={styles.locationPrompt} onPress={requestLocation}>
-                <Ionicons name="navigate-circle-outline" size={18} color="#D4AF37" />
+                <Ionicons name="navigate-circle-outline" size={18} color="#E8572A" />
                 <Text style={styles.locationPromptText}>Enable location for distance filtering</Text>
               </TouchableOpacity>
             )}
@@ -408,7 +411,7 @@ export default function FeedScreen({ navigation }: Props) {
       {renderFilterModal()}
       {isLoading ? (
         <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color="#D4AF37" />
+          <ActivityIndicator size="large" color="#E8572A" />
           <Text style={styles.loadingText}>Loading activities...</Text>
         </View>
       ) : error && listings.length === 0 ? (
@@ -429,8 +432,8 @@ export default function FeedScreen({ navigation }: Props) {
             <RefreshControl
               refreshing={isRefreshing}
               onRefresh={handleRefresh}
-              colors={['#D4AF37']}
-              tintColor="#D4AF37"
+              colors={['#E8572A']}
+              tintColor="#E8572A"
             />
           }
           onScroll={handleScroll}
@@ -450,18 +453,31 @@ const styles = StyleSheet.create({
   },
   header: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
     alignItems: 'center',
-    paddingHorizontal: 20,
+    paddingHorizontal: 16,
     paddingVertical: 15,
     borderBottomWidth: 1,
     borderBottomColor: '#e0e0e0',
     backgroundColor: '#fff',
   },
   headerTitle: {
-    fontSize: 22,
-    fontWeight: 'bold',
-    color: '#D4AF37',
+    flex: 1,
+    fontSize: 32,
+    fontFamily: 'Lora_600SemiBold_Italic',
+    color: '#E8572A',
+    textAlign: 'center',
+  },
+  headerLeft: {
+    width: 80,
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  headerRight: {
+    width: 80,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'flex-end',
+    gap: 4,
   },
   headerActions: {
     flexDirection: 'row',
@@ -496,7 +512,7 @@ const styles = StyleSheet.create({
     width: 8,
     height: 8,
     borderRadius: 4,
-    backgroundColor: '#D4AF37',
+    backgroundColor: '#E8572A',
   },
   createButton: {
     padding: 5,
@@ -538,7 +554,7 @@ const styles = StyleSheet.create({
   },
   clearText: {
     fontSize: 14,
-    color: '#D4AF37',
+    color: '#E8572A',
     fontWeight: '600',
   },
   sectionLabel: {
@@ -555,7 +571,7 @@ const styles = StyleSheet.create({
   },
   locationPromptText: {
     fontSize: 13,
-    color: '#D4AF37',
+    color: '#E8572A',
   },
   chipRow: {
     flexDirection: 'row',
@@ -574,8 +590,8 @@ const styles = StyleSheet.create({
     backgroundColor: '#f9fafb',
   },
   filterChipActive: {
-    backgroundColor: '#D4AF37',
-    borderColor: '#D4AF37',
+    backgroundColor: '#E8572A',
+    borderColor: '#E8572A',
   },
   filterChipText: {
     fontSize: 14,
@@ -621,7 +637,7 @@ const styles = StyleSheet.create({
     fontWeight: '300',
   },
   applyButton: {
-    backgroundColor: '#D4AF37',
+    backgroundColor: '#E8572A',
     paddingVertical: 14,
     borderRadius: 12,
     alignItems: 'center',
@@ -668,7 +684,7 @@ const styles = StyleSheet.create({
   createFirstButton: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#D4AF37',
+    backgroundColor: '#E8572A',
     paddingHorizontal: 20,
     paddingVertical: 12,
     borderRadius: 24,
@@ -699,7 +715,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   retryButton: {
-    backgroundColor: '#D4AF37',
+    backgroundColor: '#E8572A',
     paddingHorizontal: 24,
     paddingVertical: 12,
     borderRadius: 24,

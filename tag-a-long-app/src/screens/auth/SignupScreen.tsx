@@ -1,4 +1,4 @@
-ï»¿// Signup Screen
+// Signup Screen
 import React, { useState } from 'react';
 import {
   View,
@@ -151,7 +151,7 @@ export default function SignupScreen({ navigation }: Props) {
               editable={!isLoading}
             />
             <View style={styles.requirementsContainer}>
-              <Text style={styles.requirementText}>â€¢ At least 2 characters</Text>
+              <Text style={styles.requirementText}>• At least 2 characters</Text>
             </View>
 
             <TextInput
@@ -163,8 +163,8 @@ export default function SignupScreen({ navigation }: Props) {
               editable={!isLoading}
             />
             <View style={styles.requirementsContainer}>
-              <Text style={styles.requirementText}>â€¢ At least 3 characters</Text>
-              <Text style={styles.requirementText}>â€¢ Letters, numbers, spaces, and underscores only</Text>
+              <Text style={styles.requirementText}>• At least 3 characters</Text>
+              <Text style={styles.requirementText}>• Letters, numbers, spaces, and underscores only</Text>
             </View>
 
             <TextInput
@@ -184,7 +184,7 @@ export default function SignupScreen({ navigation }: Props) {
               keyboardType="numbers-and-punctuation"
             />
             <View style={styles.requirementsContainer}>
-              <Text style={styles.requirementText}>â€¢ Format: YYYY-MM-DD (e.g., 2000-01-15)</Text>
+              <Text style={styles.requirementText}>• Format: YYYY-MM-DD (e.g., 2000-01-15)</Text>
             </View>
 
             <TextInput
@@ -197,7 +197,7 @@ export default function SignupScreen({ navigation }: Props) {
               editable={!isLoading}
             />
             <View style={styles.requirementsContainer}>
-              <Text style={styles.requirementText}>â€¢ International format with country code</Text>
+              <Text style={styles.requirementText}>• International format with country code</Text>
             </View>
 
             <TextInput
@@ -212,10 +212,10 @@ export default function SignupScreen({ navigation }: Props) {
               autoCorrect={false}
             />
             <View style={styles.requirementsContainer}>
-              <Text style={styles.requirementText}>â€¢ At least 8 characters</Text>
-              <Text style={styles.requirementText}>â€¢ One uppercase letter</Text>
-              <Text style={styles.requirementText}>â€¢ One lowercase letter</Text>
-              <Text style={styles.requirementText}>â€¢ One number</Text>
+              <Text style={styles.requirementText}>• At least 8 characters</Text>
+              <Text style={styles.requirementText}>• One uppercase letter</Text>
+              <Text style={styles.requirementText}>• One lowercase letter</Text>
+              <Text style={styles.requirementText}>• One number</Text>
             </View>
 
             <TextInput
@@ -239,7 +239,7 @@ export default function SignupScreen({ navigation }: Props) {
               <Ionicons
                 name={agreedToTerms ? 'checkbox' : 'square-outline'}
                 size={22}
-                color={agreedToTerms ? '#D4AF37' : '#aaa'}
+                color={agreedToTerms ? '#E8572A' : '#aaa'}
               />
               <Text style={styles.termsText}>
                 I agree to the{' '}
@@ -303,7 +303,7 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 32,
     fontWeight: 'bold',
-    color: '#D4AF37',
+    color: '#E8572A',
     marginBottom: 10,
   },
   subtitle: {
@@ -345,11 +345,11 @@ const styles = StyleSheet.create({
     lineHeight: 20,
   },
   termsLink: {
-    color: '#D4AF37',
+    color: '#E8572A',
     fontWeight: '600',
   },
   signupButton: {
-    backgroundColor: '#D4AF37',
+    backgroundColor: '#E8572A',
     borderRadius: 10,
     padding: 16,
     alignItems: 'center',
@@ -373,7 +373,7 @@ const styles = StyleSheet.create({
     fontSize: 14,
   },
   loginLink: {
-    color: '#D4AF37',
+    color: '#E8572A',
     fontSize: 14,
     fontWeight: '600',
   },

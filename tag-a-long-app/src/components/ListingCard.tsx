@@ -1,4 +1,4 @@
-﻿// Listing Card Component - Display activity listing
+// Listing Card Component - Display activity listing
 import React from 'react';
 import {
   View,
@@ -48,6 +48,16 @@ export default function ListingCard({ listing, onPress, pendingRequestCount }: L
       outdoor: 'leaf',
       fitness: 'barbell',
       social: 'people',
+      music: 'musical-notes',
+      gaming: 'game-controller',
+      travel: 'car',
+      arts: 'color-palette',
+      nightlife: 'moon',
+      wellness: 'heart',
+      volunteering: 'hand-left',
+      learning: 'book',
+      pets: 'paw',
+      dating: 'heart-circle',
       other: 'apps',
     };
     return icons[category] || 'apps';
@@ -61,9 +71,30 @@ export default function ListingCard({ listing, onPress, pendingRequestCount }: L
       outdoor: '#22c55e',
       fitness: '#ef4444',
       social: '#3b82f6',
+      music: '#ec4899',
+      gaming: '#6366f1',
+      travel: '#0ea5e9',
+      arts: '#f97316',
+      nightlife: '#7c3aed',
+      wellness: '#14b8a6',
+      volunteering: '#84cc16',
+      learning: '#eab308',
+      pets: '#d97706',
+      dating: '#f43f5e',
       other: '#6b7280',
     };
     return colors[category] || '#6b7280';
+  };
+
+  const getCategoryLabel = (category: string) => {
+    const labels: { [key: string]: string } = {
+      sports: 'Sports', food: 'Food', entertainment: 'Entertainment',
+      outdoor: 'Outdoors', fitness: 'Fitness', social: 'Social',
+      music: 'Music', gaming: 'Gaming', travel: 'Travel',
+      arts: 'Arts', nightlife: 'Nightlife', wellness: 'Wellness',
+      volunteering: 'Volunteering', learning: 'Learning', pets: 'Pets', dating: 'Dating', other: 'Other',
+    };
+    return labels[category] || category;
   };
 
   return (
@@ -94,7 +125,7 @@ export default function ListingCard({ listing, onPress, pendingRequestCount }: L
           color="#fff"
         />
         <Text style={styles.categoryText}>
-          {listing.category}
+          {getCategoryLabel(listing.category)}
         </Text>
       </View>
 
@@ -174,11 +205,9 @@ const styles = StyleSheet.create({
   },
   categoryText: {
     fontSize: 12,
-    fontWeight: '700',
+    fontWeight: '600',
     color: '#fff',
-    marginLeft: 6,
-    textTransform: 'uppercase',
-    letterSpacing: 0.5,
+    marginLeft: 5,
   },
   requestBadge: {
     position: 'absolute',
@@ -204,11 +233,11 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     paddingHorizontal: 14,
-    paddingTop: 8,
-    paddingBottom: 4,
+    paddingTop: 10,
+    paddingBottom: 14,
     justifyContent: 'center',
     zIndex: 2,
-    backgroundColor: 'rgba(15, 30, 60, 0.75)',
+    backgroundColor: 'rgba(0, 0, 0, 0.62)',
   },
   title: {
     fontSize: 20,

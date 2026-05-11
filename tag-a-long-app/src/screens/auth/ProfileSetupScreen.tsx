@@ -1,4 +1,4 @@
-﻿// Profile Setup Screen - Complete profile after signup
+// Profile Setup Screen - Complete profile after signup
 import React, { useState } from 'react';
 import {
   View,
@@ -290,7 +290,7 @@ export default function ProfileSetupScreen({ navigation }: Props) {
               >
                 {(() => {
                   if (isUploadingPhoto) {
-                    return <ActivityIndicator size="large" color="#D4AF37" />;
+                    return <ActivityIndicator size="large" color="#E8572A" />;
                   } else if (profilePhoto) {
                     return (
                       <View style={{ width: '100%', height: '100%' }}>
@@ -332,7 +332,7 @@ export default function ProfileSetupScreen({ navigation }: Props) {
                     disabled={isLoading || uploadingGalleryIndex !== null}
                   >
                     {uploadingGalleryIndex === index ? (
-                      <ActivityIndicator size="small" color="#D4AF37" />
+                      <ActivityIndicator size="small" color="#E8572A" />
                     ) : photo ? (
                       <View style={{ width: '100%', height: '100%' }}>
                         <Image
@@ -417,7 +417,7 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 26,
     fontWeight: 'bold',
-    color: '#D4AF37',
+    color: '#E8572A',
     marginBottom: 8,
   },
   subtitle: {
@@ -533,7 +533,7 @@ const styles = StyleSheet.create({
     marginBottom: 15,
   },
   completeButton: {
-    backgroundColor: '#D4AF37',
+    backgroundColor: '#E8572A',
     borderRadius: 10,
     padding: 16,
     alignItems: 'center',

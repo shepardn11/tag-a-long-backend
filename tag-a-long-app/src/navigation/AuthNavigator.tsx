@@ -1,4 +1,4 @@
-﻿// Auth Navigator - Login & Signup flow
+// Auth Navigator - Login & Signup flow
 import React from 'react';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { AuthStackParamList } from '../types';

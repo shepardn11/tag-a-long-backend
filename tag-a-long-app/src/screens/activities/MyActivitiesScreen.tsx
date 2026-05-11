@@ -1,4 +1,4 @@
-﻿// My Activities Screen - User's created activities and requests
+// My Activities Screen - User's created activities and requests
 import React, { useState, useEffect, useCallback } from 'react';
 import {
   View,
@@ -62,7 +62,7 @@ export default function MyActivitiesScreen() {
         style={styles.createButton}
         onPress={() => navigation.navigate('CreateActivity')}
       >
-        <Ionicons name="add-circle" size={48} color="#D4AF37" />
+        <Ionicons name="add-circle" size={48} color="#E8572A" />
       </TouchableOpacity>
     </View>
   );
@@ -80,41 +80,23 @@ export default function MyActivitiesScreen() {
 
   return (
     <SafeAreaView style={styles.container}>
+      <View style={styles.header}>
+        <Text style={styles.headerTitle}>My Activities</Text>
+        <TouchableOpacity style={styles.headerCreateButton} onPress={() => navigation.navigate('CreateActivity')}>
+          <Ionicons name="add-circle-sharp" size={24} color="#E8572A" />
+        </TouchableOpacity>
+      </View>
       {isLoading ? (
-        <>
-          <View style={styles.header}>
-            <Text style={styles.headerTitle}>My Activities</Text>
-            <TouchableOpacity style={styles.headerCreateButton} onPress={() => navigation.navigate('CreateActivity')}>
-              <Ionicons name="add-circle-sharp" size={28} color="#D4AF37" />
-            </TouchableOpacity>
-          </View>
-          <View style={styles.loadingContainer}>
-            <ActivityIndicator size="large" color="#D4AF37" />
-            <Text style={styles.loadingText}>Loading your activities...</Text>
-          </View>
-        </>
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color="#E8572A" />
+          <Text style={styles.loadingText}>Loading your activities...</Text>
+        </View>
       ) : error ? (
-        <>
-          <View style={styles.header}>
-            <Text style={styles.headerTitle}>My Activities</Text>
-            <TouchableOpacity style={styles.headerCreateButton} onPress={() => navigation.navigate('CreateActivity')}>
-              <Ionicons name="add-circle-sharp" size={28} color="#D4AF37" />
-            </TouchableOpacity>
-          </View>
-          {renderError()}
-        </>
+        renderError()
       ) : (
         <FlatList
           data={listings}
           keyExtractor={(item) => item.id}
-          ListHeaderComponent={
-            <View style={styles.header}>
-              <Text style={styles.headerTitle}>My Activities</Text>
-              <TouchableOpacity style={styles.createButton} onPress={() => navigation.navigate('CreateActivity')}>
-                <Ionicons name="add-circle-sharp" size={28} color="#D4AF37" />
-              </TouchableOpacity>
-            </View>
-          }
           renderItem={({ item }) => {
             const pendingCount = (item as any).requests?.filter((r: any) => r.status === 'pending').length || 0;
             return (
@@ -131,8 +113,8 @@ export default function MyActivitiesScreen() {
             <RefreshControl
               refreshing={isRefreshing}
               onRefresh={handleRefresh}
-              colors={['#D4AF37']}
-              tintColor="#D4AF37"
+              colors={['#E8572A']}
+              tintColor="#E8572A"
             />
           }
         />
@@ -144,26 +126,26 @@ export default function MyActivitiesScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f9fafb',
+    backgroundColor: '#fff',
   },
   header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
     paddingHorizontal: 20,
-    paddingVertical: 15,
+    paddingTop: 20,
+    paddingBottom: 16,
     borderBottomWidth: 1,
-    borderBottomColor: '#e0e0e0',
+    borderBottomColor: '#f0f0f0',
     backgroundColor: '#fff',
   },
   headerCreateButton: {
+    position: 'absolute',
+    right: 20,
+    bottom: 12,
     padding: 5,
-    marginBottom: 8,
   },
   headerTitle: {
     fontSize: 22,
-    fontWeight: 'bold',
-    color: '#D4AF37',
+    fontFamily: 'Lora_600SemiBold_Italic',
+    color: '#E8572A',
   },
   loadingContainer: {
     flex: 1,
@@ -188,7 +170,7 @@ const styles = StyleSheet.create({
   emptyTitle: {
     fontSize: 20,
     fontWeight: 'bold',
-    color: '#D4AF37',
+    color: '#E8572A',
     marginTop: 16,
   },
   emptySubtitle: {
@@ -209,7 +191,7 @@ const styles = StyleSheet.create({
   errorTitle: {
     fontSize: 20,
     fontWeight: 'bold',
-    color: '#D4AF37',
+    color: '#E8572A',
     marginTop: 16,
   },
   errorText: {
@@ -219,7 +201,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   retryButton: {
-    backgroundColor: '#D4AF37',
+    backgroundColor: '#E8572A',
     paddingHorizontal: 24,
     paddingVertical: 12,
     borderRadius: 24,

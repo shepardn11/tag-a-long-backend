@@ -1,4 +1,4 @@
-﻿// API Endpoints - All backend API calls
+// API Endpoints - All backend API calls
 import apiClient from './client';
 import {
   User,

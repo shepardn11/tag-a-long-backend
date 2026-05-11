@@ -1,4 +1,4 @@
-﻿// Login Screen
+// Login Screen
 import React, { useState } from 'react';
 import {
   View,
@@ -127,7 +127,7 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 36,
     fontWeight: 'bold',
-    color: '#D4AF37',
+    color: '#E8572A',
     marginBottom: 10,
   },
   subtitle: {
@@ -147,7 +147,7 @@ const styles = StyleSheet.create({
     borderColor: '#e0e0e0',
   },
   loginButton: {
-    backgroundColor: '#D4AF37',
+    backgroundColor: '#E8572A',
     borderRadius: 10,
     padding: 16,
     alignItems: 'center',
@@ -171,10 +171,10 @@ const styles = StyleSheet.create({
     fontSize: 14,
   },
   signupLink: {
-    color: '#D4AF37',
+    color: '#E8572A',
     fontSize: 14,
     fontWeight: '600',
   },
   forgotPassword: { alignItems: 'center', marginTop: 12 },
-  forgotPasswordText: { color: '#D4AF37', fontSize: 14 },
+  forgotPasswordText: { color: '#E8572A', fontSize: 14 },
 });

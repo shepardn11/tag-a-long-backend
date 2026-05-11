@@ -21,7 +21,7 @@ export default class ErrorBoundary extends React.Component<React.PropsWithChildr
     if (this.state.hasError) {
       return (
         <View style={styles.container}>
-          <Ionicons name="alert-circle-outline" size={64} color="#D4AF37" />
+          <Ionicons name="alert-circle-outline" size={64} color="#E8572A" />
           <Text style={styles.title}>Something went wrong</Text>
           <Text style={styles.subtitle}>
             An unexpected error occurred. Please try again.
@@ -60,7 +60,7 @@ const styles = StyleSheet.create({
     marginBottom: 32,
   },
   button: {
-    backgroundColor: '#D4AF37',
+    backgroundColor: '#E8572A',
     paddingHorizontal: 32,
     paddingVertical: 14,
     borderRadius: 10,

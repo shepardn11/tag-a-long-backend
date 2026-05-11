@@ -1,4 +1,4 @@
-﻿// Activity Detail Screen - Full activity information with Tag-a-long button
+// Activity Detail Screen - Full activity information with Tag-a-long button
 import React, { useState, useEffect } from 'react';
 import {
   View,
@@ -6,7 +6,6 @@ import {
   StyleSheet,
   ScrollView,
   TouchableOpacity,
-
   ActivityIndicator,
   Alert,
   Dimensions,
@@ -16,7 +15,7 @@ import {
   Platform,
 } from 'react-native';
 
-const { height: SCREEN_HEIGHT } = Dimensions.get('window');
+const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RouteProp } from '@react-navigation/native';
 import { HomeStackParamList, ActivityListing } from '../../types';
@@ -26,6 +25,7 @@ import { listingAPI, requestAPI } from '../../api/endpoints';
 import { useAuthStore } from '../../store/authStore';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import UserSelectionModal from '../../components/UserSelectionModal';
+import LightboxModal from '../../components/LightboxModal';
 
 type ActivityDetailScreenNavigationProp = NativeStackNavigationProp<
   HomeStackParamList,
@@ -76,6 +76,7 @@ export default function ActivityDetailScreen({ navigation, route }: Props) {
   const [tempDate, setTempDate] = useState(new Date());
   const [tempTime, setTempTime] = useState(new Date());
   const [isSaving, setIsSaving] = useState(false);
+  const [lightboxPhoto, setLightboxPhoto] = useState<string | null>(null);
 
   // Check if this is the current user's own activity
   const isOwnActivity = listing?.user_id === user?.id;
@@ -253,6 +254,7 @@ export default function ActivityDetailScreen({ navigation, route }: Props) {
       volunteering: 'hand-left',
       learning: 'book',
       pets: 'paw',
+      dating: 'heart-circle',
       other: 'apps',
     };
     return icons[category] || 'apps';
@@ -275,9 +277,21 @@ export default function ActivityDetailScreen({ navigation, route }: Props) {
       volunteering: '#84cc16',
       learning: '#eab308',
       pets: '#d97706',
+      dating: '#f43f5e',
       other: '#6b7280',
     };
     return colors[category] || '#6b7280';
+  };
+
+  const getCategoryLabel = (category: string) => {
+    const labels: { [key: string]: string } = {
+      sports: 'Sports', food: 'Food', entertainment: 'Entertainment',
+      outdoor: 'Outdoors', fitness: 'Fitness', social: 'Social',
+      music: 'Music', gaming: 'Gaming', travel: 'Travel',
+      arts: 'Arts', nightlife: 'Nightlife', wellness: 'Wellness',
+      volunteering: 'Volunteering', learning: 'Learning', pets: 'Pets', dating: 'Dating', other: 'Other',
+    };
+    return labels[category] || category;
   };
 
   if (isLoading || !listing) {
@@ -289,7 +303,7 @@ export default function ActivityDetailScreen({ navigation, route }: Props) {
           </TouchableOpacity>
         </View>
         <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color="#D4AF37" />
+          <ActivityIndicator size="large" color="#E8572A" />
           <Text style={styles.loadingText}>Loading activity...</Text>
         </View>
       </View>
@@ -306,7 +320,7 @@ export default function ActivityDetailScreen({ navigation, route }: Props) {
         <Text style={styles.headerTitle}>Activity Details</Text>
         {isOwnActivity ? (
           <TouchableOpacity onPress={openEdit} style={styles.editButton}>
-            <Ionicons name="pencil-outline" size={22} color="#D4AF37" />
+            <Ionicons name="pencil-outline" size={22} color="#E8572A" />
           </TouchableOpacity>
         ) : (
           <View style={{ width: 40 }} />
@@ -315,13 +329,15 @@ export default function ActivityDetailScreen({ navigation, route }: Props) {
 
       <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
         {/* Featured Image */}
-        <Image
-          source={{
-            uri: listing.photo_url || listing.profile_photo_url || 'https://via.placeholder.com/400x300',
-          }}
-          style={styles.featuredImage}
-          contentFit="cover"
-        />
+        <TouchableOpacity activeOpacity={0.9} onPress={() => setLightboxPhoto(listing.photo_url || listing.profile_photo_url || null)}>
+          <Image
+            source={{
+              uri: listing.photo_url || listing.profile_photo_url || 'https://via.placeholder.com/400x300',
+            }}
+            style={styles.featuredImage}
+            contentFit="cover"
+          />
+        </TouchableOpacity>
 
         {/* Content */}
         <View style={[styles.content, isOwnActivity && styles.contentNoButton]}>
@@ -330,7 +346,7 @@ export default function ActivityDetailScreen({ navigation, route }: Props) {
             style={[styles.categoryBadge, { backgroundColor: getCategoryColor(listing.category) }]}
           >
             <Ionicons name={getCategoryIcon(listing.category)} size={16} color="#fff" />
-            <Text style={styles.categoryText}>{listing.category}</Text>
+            <Text style={styles.categoryText}>{getCategoryLabel(listing.category)}</Text>
           </View>
 
           {/* Title */}
@@ -432,7 +448,7 @@ export default function ActivityDetailScreen({ navigation, route }: Props) {
 
             <View style={styles.detailCard}>
               <View style={styles.detailRow}>
-                <Ionicons name="calendar" size={20} color="#D4AF37" />
+                <Ionicons name="calendar" size={20} color="#E8572A" />
                 <View style={styles.detailContent}>
                   <Text style={styles.detailLabel}>Date</Text>
                   <Text style={styles.detailValue}>{formatDate(listing.date)}</Text>
@@ -441,7 +457,7 @@ export default function ActivityDetailScreen({ navigation, route }: Props) {
 
               {listing.time && (
                 <View style={styles.detailRow}>
-                  <Ionicons name="time" size={20} color="#D4AF37" />
+                  <Ionicons name="time" size={20} color="#E8572A" />
                   <View style={styles.detailContent}>
                     <Text style={styles.detailLabel}>Time</Text>
                     <Text style={styles.detailValue}>{formatTime(listing.time)}</Text>
@@ -450,7 +466,7 @@ export default function ActivityDetailScreen({ navigation, route }: Props) {
               )}
 
               <View style={styles.detailRow}>
-                <Ionicons name="location" size={20} color="#D4AF37" />
+                <Ionicons name="location" size={20} color="#E8572A" />
                 <View style={styles.detailContent}>
                   <Text style={styles.detailLabel}>Location</Text>
                   <Text style={styles.detailValue}>{listing.location}</Text>
@@ -459,7 +475,7 @@ export default function ActivityDetailScreen({ navigation, route }: Props) {
 
               {listing.max_participants && (
                 <View style={styles.detailRow}>
-                  <Ionicons name="people" size={20} color="#D4AF37" />
+                  <Ionicons name="people" size={20} color="#E8572A" />
                   <View style={styles.detailContent}>
                     <Text style={styles.detailLabel}>Looking for</Text>
                     <Text style={styles.detailValue}>
@@ -531,7 +547,7 @@ export default function ActivityDetailScreen({ navigation, route }: Props) {
               <Text style={styles.modalTitle}>Edit Activity</Text>
               <TouchableOpacity onPress={handleEditSave} disabled={isSaving}>
                 {isSaving ? (
-                  <ActivityIndicator size="small" color="#D4AF37" />
+                  <ActivityIndicator size="small" color="#E8572A" />
                 ) : (
                   <Text style={styles.modalSave}>Save</Text>
                 )}
@@ -568,7 +584,7 @@ export default function ActivityDetailScreen({ navigation, route }: Props) {
                   style={styles.dateTimeButton}
                   onPress={() => { setTempDate(editDate); setShowDatePicker(true); }}
                 >
-                  <Ionicons name="calendar-outline" size={18} color="#D4AF37" />
+                  <Ionicons name="calendar-outline" size={18} color="#E8572A" />
                   <Text style={styles.dateTimeButtonText}>
                     {editDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
                   </Text>
@@ -577,7 +593,7 @@ export default function ActivityDetailScreen({ navigation, route }: Props) {
                   style={styles.dateTimeButton}
                   onPress={() => { setTempTime(editTime); setShowTimePicker(true); }}
                 >
-                  <Ionicons name="time-outline" size={18} color="#D4AF37" />
+                  <Ionicons name="time-outline" size={18} color="#E8572A" />
                   <Text style={styles.dateTimeButtonText}>
                     {editTime.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true })}
                   </Text>
@@ -646,7 +662,7 @@ export default function ActivityDetailScreen({ navigation, route }: Props) {
                     display="inline"
                     onChange={(_, d) => { if (d) { setEditDate(d); setTempDate(d); } }}
                     minimumDate={new Date()}
-                    accentColor="#D4AF37"
+                    accentColor="#E8572A"
                   />
                   <View style={styles.pickerFooter}>
                     <TouchableOpacity onPress={() => setShowDatePicker(false)}>
@@ -685,6 +701,8 @@ export default function ActivityDetailScreen({ navigation, route }: Props) {
           </View>
         </KeyboardAvoidingView>
       </Modal>
+
+      <LightboxModal uri={lightboxPhoto} onClose={() => setLightboxPhoto(null)} />
 
       {/* Fixed Bottom Button - Only show if not own activity */}
       {!isOwnActivity && (
@@ -765,7 +783,7 @@ const styles = StyleSheet.create({
   modalSave: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#D4AF37',
+    color: '#E8572A',
   },
   modalContent: {
     flex: 1,
@@ -838,7 +856,7 @@ const styles = StyleSheet.create({
   pickerDone: {
     fontSize: 17,
     fontWeight: '600',
-    color: '#D4AF37',
+    color: '#E8572A',
   },
   tagButton: {
     flexDirection: 'row',
@@ -887,7 +905,7 @@ const styles = StyleSheet.create({
   taggedUserName: {
     fontSize: 13,
     fontWeight: '500',
-    color: '#D4AF37',
+    color: '#E8572A',
   },
   headerTitle: {
     fontSize: 18,
@@ -930,10 +948,9 @@ const styles = StyleSheet.create({
   },
   categoryText: {
     fontSize: 12,
-    fontWeight: '700',
+    fontWeight: '600',
     color: '#fff',
-    marginLeft: 6,
-    textTransform: 'uppercase',
+    marginLeft: 5,
   },
   title: {
     fontSize: 28,
@@ -1168,10 +1185,10 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#D4AF37',
+    backgroundColor: '#E8572A',
     paddingVertical: 16,
     borderRadius: 12,
-    shadowColor: '#D4AF37',
+    shadowColor: '#E8572A',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,
     shadowRadius: 8,

@@ -1,4 +1,4 @@
-﻿// API Client - Connects to Tag-A-Long Backend
+// API Client - Connects to Tag-A-Long Backend
 import axios, { AxiosInstance } from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Platform } from 'react-native';
@@ -46,7 +46,7 @@ class APIClient {
       (response) => response,
       async (error) => {
         if (error.response?.status === 401) {
-          // Token expired or revoked â€” clear everything and navigate to login
+          // Token expired or revoked — clear everything and navigate to login
           this.authToken = null;
           await AsyncStorage.multiRemove(['auth_token', 'user', 'profileSetupComplete']);
           const { navigateToAuth } = await import('../navigation/navigationRef');

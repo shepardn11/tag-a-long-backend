@@ -1,4 +1,4 @@
-﻿import React, { useState } from 'react';
+import React, { useState } from 'react';
 import {
   View, Text, TextInput, TouchableOpacity, StyleSheet,
   KeyboardAvoidingView, Platform, Alert, ActivityIndicator, SafeAreaView,
@@ -37,7 +37,7 @@ export default function ForgotPasswordScreen({ navigation }: Props) {
     <SafeAreaView style={styles.container}>
       <KeyboardAvoidingView style={styles.inner} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
         <TouchableOpacity style={styles.back} onPress={() => navigation.goBack()}>
-          <Text style={styles.backText}>â† Back</Text>
+          <Text style={styles.backText}>← Back</Text>
         </TouchableOpacity>
 
         <Text style={styles.title}>Forgot Password</Text>
@@ -65,7 +65,7 @@ const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#fff' },
   inner: { flex: 1, paddingHorizontal: 30, paddingTop: 20 },
   back: { marginBottom: 32 },
-  backText: { color: '#D4AF37', fontSize: 16 },
+  backText: { color: '#E8572A', fontSize: 16 },
   title: { fontSize: 28, fontWeight: 'bold', color: '#1a1a1a', marginBottom: 8 },
   subtitle: { fontSize: 15, color: '#666', marginBottom: 32, lineHeight: 22 },
   input: {
@@ -73,7 +73,7 @@ const styles = StyleSheet.create({
     fontSize: 16, marginBottom: 16, borderWidth: 1, borderColor: '#e0e0e0',
   },
   button: {
-    backgroundColor: '#D4AF37', borderRadius: 10, padding: 16, alignItems: 'center',
+    backgroundColor: '#E8572A', borderRadius: 10, padding: 16, alignItems: 'center',
   },
   buttonDisabled: { opacity: 0.6 },
   buttonText: { color: '#fff', fontSize: 16, fontWeight: '600' },

@@ -1,4 +1,4 @@
-﻿// TypeScript Types for Tag-A-Long App
+// TypeScript Types for Tag-A-Long App
 
 export interface User {
   id: string;

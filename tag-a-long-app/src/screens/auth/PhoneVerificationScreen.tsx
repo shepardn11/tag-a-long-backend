@@ -102,7 +102,7 @@ export default function PhoneVerificationScreen({ navigation, route }: Props) {
 
         <TouchableOpacity onPress={handleResend} disabled={isResending} style={styles.resendButton}>
           {isResending ? (
-            <ActivityIndicator color="#D4AF37" size="small" />
+            <ActivityIndicator color="#E8572A" size="small" />
           ) : (
             <Text style={styles.resendText}>Didn't get a code? <Text style={styles.resendLink}>Resend</Text></Text>
           )}
@@ -127,13 +127,13 @@ const styles = StyleSheet.create({
   },
   backText: {
     fontSize: 16,
-    color: '#D4AF37',
+    color: '#E8572A',
     fontWeight: '600',
   },
   title: {
     fontSize: 28,
     fontWeight: 'bold',
-    color: '#D4AF37',
+    color: '#E8572A',
     marginBottom: 12,
   },
   subtitle: {
@@ -158,7 +158,7 @@ const styles = StyleSheet.create({
     marginBottom: 24,
   },
   verifyButton: {
-    backgroundColor: '#D4AF37',
+    backgroundColor: '#E8572A',
     borderRadius: 10,
     padding: 16,
     alignItems: 'center',
@@ -181,7 +181,7 @@ const styles = StyleSheet.create({
     color: '#666',
   },
   resendLink: {
-    color: '#D4AF37',
+    color: '#E8572A',
     fontWeight: '600',
   },
 });

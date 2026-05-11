@@ -211,6 +211,7 @@ export default function UserSelectionModal({
             renderItem={renderUserItem}
             keyExtractor={(item) => item.id}
             contentContainerStyle={styles.listContent}
+            keyboardShouldPersistTaps="handled"
           />
         )}
       </KeyboardAvoidingView>

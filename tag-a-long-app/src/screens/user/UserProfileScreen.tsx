@@ -163,92 +163,65 @@ export default function UserProfileScreen({ navigation, route }: Props) {
         <View style={styles.placeholder} />
       </View>
 
-      <ScrollView style={styles.content}>
-        {/* Profile Photo */}
-        <View style={styles.photoSection}>
-          {user.profile_photo_url ? (
-            <TouchableOpacity activeOpacity={1} onPress={() => setLightboxPhoto(user.profile_photo_url!)}>
-              <Image
-                source={{ uri: user.profile_photo_url }}
-                style={styles.profilePhoto}
-              />
-            </TouchableOpacity>
-          ) : (
-            <View style={styles.profilePhotoPlaceholder}>
-              <Ionicons name="person" size={64} color="#999" />
-            </View>
-          )}
+      <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
+        {/* Hero: photo left, info right */}
+        <View style={styles.heroSection}>
+          <TouchableOpacity
+            style={styles.photoContainer}
+            activeOpacity={user.profile_photo_url ? 0.85 : 1}
+            onPress={() => user.profile_photo_url && setLightboxPhoto(user.profile_photo_url)}
+          >
+            {user.profile_photo_url ? (
+              <Image source={{ uri: user.profile_photo_url }} style={styles.profilePhoto} />
+            ) : (
+              <View style={styles.profilePhotoPlaceholder}>
+                <Ionicons name="person" size={40} color="#ccc" />
+              </View>
+            )}
+          </TouchableOpacity>
 
-          {/* Name and Username */}
-          <View style={styles.nameSection}>
+          <View style={styles.profileInfo}>
             <View style={styles.nameRow}>
               <Text style={styles.displayName}>{user.display_name}</Text>
               {user.is_premium && (
-                <Ionicons name="checkmark-circle" size={24} color="#E8572A" />
+                <Ionicons name="checkmark-circle" size={18} color="#E8572A" />
               )}
             </View>
             <Text style={styles.username}>@{user.username}</Text>
+            <View style={styles.metaRow}>
+              {user.city && (
+                <View style={styles.metaItem}>
+                  <Ionicons name="location-outline" size={13} color="#888" />
+                  <Text style={styles.metaText}>{user.city}</Text>
+                </View>
+              )}
+              {user.instagram_handle && (
+                <View style={styles.metaItem}>
+                  <Ionicons name="logo-instagram" size={13} color="#888" />
+                  <Text style={styles.metaText}>@{user.instagram_handle}</Text>
+                </View>
+              )}
+            </View>
+            {user.bio && <Text style={styles.bio}>{user.bio}</Text>}
           </View>
         </View>
 
-        {/* Info Section */}
-        <View style={styles.infoSection}>
-          {/* Location */}
-          {user.city && (
-            <View style={styles.infoRow}>
-              <Ionicons name="location" size={20} color="#E8572A" />
-              <Text style={styles.infoText}>{user.city}</Text>
-            </View>
-          )}
-
-          {/* Join Date */}
-          {user.created_at && (
-            <View style={styles.infoRow}>
-              <Ionicons name="calendar" size={20} color="#E8572A" />
-              <Text style={styles.infoText}>
-                Joined {new Date(user.created_at).toLocaleDateString('en-US', {
-                  month: 'long',
-                  year: 'numeric',
-                })}
-              </Text>
-            </View>
-          )}
-
-          {/* Instagram */}
-          {user.instagram_handle && (
-            <View style={styles.infoRow}>
-              <Ionicons name="logo-instagram" size={20} color="#E8572A" />
-              <Text style={styles.infoText}>@{user.instagram_handle}</Text>
-            </View>
-          )}
-        </View>
-
-        {/* Bio */}
-        {user.bio && (
-          <View style={styles.bioSection}>
-            <Text style={styles.sectionTitle}>About</Text>
-            <Text style={styles.bioText}>{user.bio}</Text>
-          </View>
-        )}
+        <View style={styles.divider} />
 
         {/* Photo Gallery */}
         {user.photo_gallery && user.photo_gallery.length > 0 && (
           <View style={styles.gallerySection}>
-            <Text style={[styles.sectionTitle, { paddingHorizontal: 20 }]}>Photos</Text>
             <View style={styles.galleryGrid}>
               {user.photo_gallery.map((photo, index) => (
-                <TouchableOpacity key={index} activeOpacity={1} style={styles.galleryPhotoContainer} onPress={() => setLightboxPhoto(photo)}>
-                  <Image
-                    source={{ uri: photo }}
-                    style={styles.galleryPhoto}
-                  />
+                <TouchableOpacity key={index} activeOpacity={0.85} style={styles.galleryPhotoContainer} onPress={() => setLightboxPhoto(photo)}>
+                  <Image source={{ uri: photo }} style={styles.galleryPhoto} contentFit="cover" />
                 </TouchableOpacity>
               ))}
             </View>
           </View>
         )}
 
-        {/* Action Buttons */}
+        {/* Message Button */}
         <View style={styles.actionSection}>
           <TouchableOpacity
             style={styles.messageButton}
@@ -340,88 +313,97 @@ const styles = StyleSheet.create({
   content: {
     flex: 1,
   },
-  photoSection: {
-    alignItems: 'center',
-    paddingVertical: 30,
+  heroSection: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    paddingTop: 20,
+    paddingHorizontal: 20,
+    paddingBottom: 20,
     backgroundColor: '#fff',
   },
+  photoContainer: {
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 4,
+  },
   profilePhoto: {
-    width: 120,
-    height: 120,
-    borderRadius: 60,
+    width: 88,
+    height: 88,
+    borderRadius: 44,
+    borderWidth: 2.5,
+    borderColor: '#E8572A',
   },
   profilePhotoPlaceholder: {
-    width: 120,
-    height: 120,
-    borderRadius: 60,
+    width: 88,
+    height: 88,
+    borderRadius: 44,
     backgroundColor: '#f5f5f5',
     justifyContent: 'center',
     alignItems: 'center',
+    borderWidth: 2,
+    borderColor: '#e0e0e0',
   },
-  nameSection: {
-    alignItems: 'center',
-    marginTop: 16,
+  profileInfo: {
+    flex: 1,
+    paddingLeft: 16,
+    paddingTop: 2,
   },
   nameRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
+    gap: 6,
+    marginBottom: 2,
   },
   displayName: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: '#333',
+    fontSize: 22,
+    fontWeight: '700',
+    color: '#1a1a1a',
+    letterSpacing: -0.3,
   },
   username: {
-    fontSize: 16,
-    color: '#666',
-    marginTop: 4,
+    fontSize: 14,
+    color: '#888',
+    marginBottom: 6,
   },
-  infoSection: {
-    backgroundColor: '#fff',
-    marginTop: 12,
-    paddingVertical: 16,
-    paddingHorizontal: 20,
+  metaRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 10,
+    marginBottom: 8,
   },
-  infoRow: {
+  metaItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 12,
+    gap: 4,
   },
-  infoText: {
-    fontSize: 16,
-    color: '#333',
-    marginLeft: 12,
+  metaText: {
+    fontSize: 13,
+    color: '#888',
   },
-  bioSection: {
-    backgroundColor: '#fff',
-    marginTop: 12,
-    padding: 20,
+  bio: {
+    fontSize: 14,
+    color: '#444',
+    lineHeight: 20,
   },
-  sectionTitle: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: '#333',
-    marginBottom: 12,
-  },
-  bioText: {
-    fontSize: 15,
-    color: '#666',
-    lineHeight: 22,
+  divider: {
+    height: 1,
+    backgroundColor: '#f0f0f0',
   },
   gallerySection: {
-    backgroundColor: '#fff',
-    marginTop: 12,
-    paddingTop: 20,
+    paddingTop: 6,
   },
   galleryGrid: {
-    flexDirection: 'column',
-    gap: 12,
+    flexDirection: 'row',
+    flexWrap: 'wrap',
   },
   galleryPhotoContainer: {
-    width: '100%',
+    width: '50%',
     aspectRatio: 1,
     overflow: 'hidden',
+    backgroundColor: '#f5f5f5',
+    padding: 1,
   },
   galleryPhoto: {
     width: '100%',

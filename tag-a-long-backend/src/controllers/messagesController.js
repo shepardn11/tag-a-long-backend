@@ -1,4 +1,7 @@
 const prisma = require('../config/database');
+const { sendToMultipleDevices } = require('../services/fcmService');
+
+const ACTIVITY_SHARE_PREFIX = '[activity_share]';
 
 // Get all conversations for the current user
 const getConversations = async (req, res, next) => {
@@ -289,7 +292,7 @@ const sendMessage = async (req, res, next) => {
       });
     }
 
-    if (content.length > 500) {
+    if (!content.startsWith(ACTIVITY_SHARE_PREFIX) && content.length > 500) {
       return res.status(400).json({
         success: false,
         error: { code: 'MESSAGE_TOO_LONG', message: 'Message cannot exceed 500 characters' },
@@ -366,6 +369,39 @@ const sendMessage = async (req, res, next) => {
       where: { id: conversation_id },
       data: { updated_at: new Date() },
     });
+
+    // Create notification for activity shares
+    if (content.startsWith(ACTIVITY_SHARE_PREFIX)) {
+      try {
+        const activityData = JSON.parse(content.slice(ACTIVITY_SHARE_PREFIX.length));
+        const sender = await prisma.user.findUnique({
+          where: { id: userId },
+          select: { display_name: true, username: true, profile_photo_url: true },
+        });
+        const notification = await prisma.notification.create({
+          data: {
+            user_id: otherId,
+            type: 'activity_shared',
+            title: `${sender.display_name} shared an activity with you`,
+            body: activityData.title || 'Check it out in your messages',
+            data: JSON.stringify({
+              conversation_id,
+              sender_id: userId,
+              sender_username: sender.username,
+              sender_display_name: sender.display_name,
+              sender_photo: sender.profile_photo_url,
+            }),
+          },
+        });
+        await sendToMultipleDevices(otherId, {
+          title: notification.title,
+          body: notification.body,
+          data: { conversation_id, sender_id: userId },
+        });
+      } catch (err) {
+        console.error('Error creating activity share notification:', err);
+      }
+    }
 
     res.status(201).json({
       success: true,

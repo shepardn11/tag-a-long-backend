@@ -243,7 +243,7 @@ const styles = StyleSheet.create({
     zIndex: 2,
   },
   title: {
-    fontSize: 26,
+    fontSize: 30,
     fontWeight: 'bold',
     color: '#fff',
   },

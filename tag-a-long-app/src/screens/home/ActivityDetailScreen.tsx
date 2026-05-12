@@ -21,7 +21,7 @@ import { RouteProp } from '@react-navigation/native';
 import { HomeStackParamList, ActivityListing } from '../../types';
 import { Image } from 'expo-image';
 import { Ionicons } from '@expo/vector-icons';
-import { listingAPI, requestAPI } from '../../api/endpoints';
+import { listingAPI, requestAPI, notificationAPI } from '../../api/endpoints';
 import { useAuthStore } from '../../store/authStore';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import UserSelectionModal from '../../components/UserSelectionModal';
@@ -93,6 +93,9 @@ export default function ActivityDetailScreen({ navigation, route }: Props) {
       setIsLoading(true);
       const data = await listingAPI.getById(activityId);
       setListing(data);
+
+      // Mark all notifications for this listing as read and refresh badges
+      notificationAPI.markReadForListing(activityId).then(() => refreshTabCounts()).catch(() => {});
 
       // If it's own activity, fetch requests
       if (data.user_id === user?.id) {

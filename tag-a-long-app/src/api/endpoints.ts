@@ -233,6 +233,11 @@ export const notificationAPI = {
     return response.data;
   },
 
+  // Mark all notifications for a specific listing as read
+  markReadForListing: async (listingId: string) => {
+    await api.put(`/notifications/read-for-listing/${listingId}`);
+  },
+
   // Delete notification
   delete: async (notificationId: string) => {
     const response = await api.delete(`/notifications/${notificationId}`);

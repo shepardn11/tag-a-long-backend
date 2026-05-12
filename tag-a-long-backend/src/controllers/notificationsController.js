@@ -191,11 +191,29 @@ const unregisterToken = async (req, res, next) => {
   }
 };
 
+const markReadForListing = async (req, res, next) => {
+  try {
+    const { listingId } = req.params;
+    await prisma.notification.updateMany({
+      where: {
+        user_id: req.user.id,
+        is_read: false,
+        data: { contains: listingId },
+      },
+      data: { is_read: true },
+    });
+    res.json({ success: true });
+  } catch (error) {
+    next(error);
+  }
+};
+
 module.exports = {
   getNotifications,
   getUnreadCount,
   markAsRead,
   markAllAsRead,
+  markReadForListing,
   registerToken,
   unregisterToken,
 };

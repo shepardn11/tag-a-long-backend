@@ -150,7 +150,7 @@ const getListingById = async (req, res, next) => {
   try {
     const { id } = req.params;
 
-    // Get listing by ID
+    // Get listing by ID — include all requests with requester info
     const listing = await prisma.listing.findUnique({
       where: { id },
       include: {
@@ -163,8 +163,16 @@ const getListingById = async (req, res, next) => {
           },
         },
         requests: {
-          where: { requester_id: req.user.id },
-          select: { id: true, status: true },
+          include: {
+            requester: {
+              select: {
+                id: true,
+                username: true,
+                display_name: true,
+                profile_photo_url: true,
+              },
+            },
+          },
         },
       },
     });
@@ -193,21 +201,11 @@ const getListingById = async (req, res, next) => {
       });
     }
 
-    // Fetch accepted participants
-    const acceptedRequests = await prisma.tagAlongRequest.findMany({
-      where: { listing_id: id, status: 'accepted' },
-      include: {
-        requester: {
-          select: {
-            id: true,
-            username: true,
-            display_name: true,
-            profile_photo_url: true,
-          },
-        },
-      },
-    });
-    const acceptedParticipants = acceptedRequests.map(r => r.requester);
+    // Derive per-user request info and accepted participants from the single query
+    const myRequest = listing.requests.find(r => r.requester_id === req.user.id);
+    const acceptedParticipants = listing.requests
+      .filter(r => r.status === 'accepted')
+      .map(r => r.requester);
 
     // Format response
     const formattedListing = {
@@ -229,8 +227,8 @@ const getListingById = async (req, res, next) => {
       username: listing.user.username,
       display_name: listing.user.display_name,
       profile_photo_url: listing.user.profile_photo_url,
-      has_requested: listing.requests.length > 0,
-      request_status: listing.requests.length > 0 ? listing.requests[0].status : null,
+      has_requested: !!myRequest,
+      request_status: myRequest?.status || null,
       tagged_users: taggedUsers,
       accepted_participants: acceptedParticipants,
     };

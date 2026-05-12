@@ -140,7 +140,9 @@ export default function ListingCard({ listing, onPress, pendingRequestCount }: L
 
       {/* Content Overlay - Bottom */}
       <View style={styles.contentOverlay}>
-        <Text style={styles.title} numberOfLines={2}>{listing.title}</Text>
+        <View style={[styles.infoItem, styles.titleBubble]}>
+          <Text style={styles.title} numberOfLines={2}>{listing.title}</Text>
+        </View>
 
         <View style={styles.infoGrid}>
           <View style={styles.infoItem}>
@@ -243,7 +245,6 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontWeight: 'bold',
     color: '#fff',
-    marginBottom: 6,
   },
   infoGrid: {
     flexDirection: 'row',
@@ -254,10 +255,16 @@ const styles = StyleSheet.create({
   infoItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+    backgroundColor: 'rgba(0, 0, 0, 0.45)',
     paddingHorizontal: 8,
     paddingVertical: 3,
     borderRadius: 10,
+  },
+  titleBubble: {
+    alignSelf: 'flex-start',
+    marginBottom: 6,
+    paddingVertical: 5,
+    paddingHorizontal: 10,
   },
   infoItemFull: {
     flex: 1,

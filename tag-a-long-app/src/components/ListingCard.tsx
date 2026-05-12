@@ -238,7 +238,6 @@ const styles = StyleSheet.create({
     paddingBottom: 14,
     justifyContent: 'center',
     zIndex: 2,
-    backgroundColor: 'rgba(0, 0, 0, 0.62)',
   },
   title: {
     fontSize: 20,

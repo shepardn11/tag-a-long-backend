@@ -179,7 +179,7 @@ export default function ListingCard({ listing, onPress, pendingRequestCount }: L
 const styles = StyleSheet.create({
   card: {
     backgroundColor: '#000',
-    marginBottom: 16,
+    marginBottom: 4,
     minHeight: SCREEN_HEIGHT * 0.69,
     overflow: 'hidden',
     position: 'relative',

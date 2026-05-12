@@ -112,6 +112,9 @@ export default function FeedScreen({ navigation }: Props) {
     lastScrollY.current = currentY;
 
     if (isAnimating.current) return;
+    // If content fits on screen even with the header visible, don't animate —
+    // the bounce would create a layout-shift feedback loop causing the shake.
+    if (contentHeight <= layoutHeight + HEADER_HEIGHT) return;
     if (currentY + layoutHeight >= contentHeight - 20) return;
 
     if (diff > 4 && isHeaderVisible.current && currentY > HEADER_HEIGHT) {

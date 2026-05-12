@@ -194,7 +194,7 @@ const getListingById = async (req, res, next) => {
     }
 
     // Fetch accepted participants
-    const acceptedRequests = await prisma.request.findMany({
+    const acceptedRequests = await prisma.tagAlongRequest.findMany({
       where: { listing_id: id, status: 'accepted' },
       include: {
         requester: {

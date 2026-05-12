@@ -103,7 +103,7 @@ export default function ListingCard({ listing, onPress, pendingRequestCount }: L
       activeOpacity={0.95}
     >
 
-      {/* Large Featured Image - Use photo_url from listing, or fall back to profile photo */}
+      {/* Large Featured Image - Use photo_url, fall back to category placeholder */}
       {(listing.photo_url || listing.profile_photo_url) ? (
         <Image
           source={{ uri: listing.photo_url || listing.profile_photo_url }}
@@ -111,8 +111,10 @@ export default function ListingCard({ listing, onPress, pendingRequestCount }: L
           contentFit="cover"
         />
       ) : (
-        <View style={[styles.featuredImage, styles.placeholderImage]}>
-          <Ionicons name="image-outline" size={80} color="#999" />
+        <View style={[styles.featuredImage, { backgroundColor: getCategoryColor(listing.category) }]}>
+          <View style={styles.categoryPlaceholder}>
+            <Ionicons name={getCategoryIcon(listing.category)} size={110} color="rgba(255,255,255,0.25)" />
+          </View>
         </View>
       )}
 
@@ -186,8 +188,8 @@ const styles = StyleSheet.create({
     top: 0,
     left: 0,
   },
-  placeholderImage: {
-    backgroundColor: '#f5f5f5',
+  categoryPlaceholder: {
+    flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
   },

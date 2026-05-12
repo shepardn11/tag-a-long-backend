@@ -312,8 +312,8 @@ export default function CreateListingScreen({ navigation }: Props) {
         return;
       }
 
-      // Upload photo if one was selected, otherwise use profile photo
-      let uploadedPhotoUrl = user?.profile_photo_url || null;
+      // Upload photo if one was selected, otherwise leave null (category image shown)
+      let uploadedPhotoUrl: string | null = null;
 
       if (photoUri && user?.id) {
         try {
@@ -322,11 +322,9 @@ export default function CreateListingScreen({ navigation }: Props) {
           console.error('Photo upload failed:', uploadError);
           Alert.alert(
             'Photo Upload Failed',
-            'Could not upload photo. Using your profile picture instead.',
+            'Could not upload photo. A category image will be used instead.',
             [{ text: 'OK' }]
           );
-          // Fall back to profile photo
-          uploadedPhotoUrl = user?.profile_photo_url || null;
         }
       }
 
@@ -456,7 +454,7 @@ export default function CreateListingScreen({ navigation }: Props) {
           <View style={styles.inputGroup}>
             <Text style={styles.label}>Activity Photo (Optional)</Text>
             <Text style={styles.sublabel}>
-              Add a photo or we'll use your profile picture
+              Optional — a category image will be used if none selected
             </Text>
 
             {photoUri ? (

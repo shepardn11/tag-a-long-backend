@@ -255,7 +255,7 @@ const styles = StyleSheet.create({
   infoItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: 'rgba(0, 0, 0, 0.45)',
+    backgroundColor: 'rgba(0, 0, 0, 0.65)',
     paddingHorizontal: 12,
     paddingVertical: 6,
     borderRadius: 12,

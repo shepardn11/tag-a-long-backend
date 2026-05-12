@@ -262,6 +262,11 @@ const acceptRequest = async (req, res, next) => {
       });
     }
 
+    // Idempotency: already processed
+    if (request.status !== 'pending') {
+      return res.json({ success: true, data: request });
+    }
+
     // Update request
     const updatedRequest = await prisma.tagAlongRequest.update({
       where: { id },

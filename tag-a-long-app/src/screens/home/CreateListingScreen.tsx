@@ -381,9 +381,6 @@ export default function CreateListingScreen({ navigation }: Props) {
         }, 100);
       }
     } catch (error: any) {
-      console.error('Create listing error:', error);
-      console.error('Error response:', JSON.stringify(error.response?.data, null, 2));
-      console.error('Error status:', error.response?.status);
       const errorMsg = error.response?.data?.error?.message ||
                        error.response?.data?.message ||
                        error.message ||

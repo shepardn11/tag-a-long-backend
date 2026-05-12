@@ -33,6 +33,10 @@ export default function LoginScreen({ navigation }: Props) {
       Alert.alert('Error', 'Please enter both email and password');
       return;
     }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      Alert.alert('Error', 'Please enter a valid email address');
+      return;
+    }
 
     try {
       await login({ email, password });

@@ -56,6 +56,18 @@ const createListingSchema = Joi.object({
   photo_url: Joi.string().uri().allow('', null).optional(),
 });
 
+const updateListingSchema = Joi.object({
+  title: Joi.string().min(3).max(200),
+  description: Joi.string().min(10).max(500),
+  category: Joi.string().valid('sports', 'food', 'entertainment', 'outdoor', 'fitness', 'social', 'music', 'gaming', 'travel', 'arts', 'nightlife', 'wellness', 'volunteering', 'learning', 'pets', 'dating', 'other'),
+  location: Joi.string().min(2).max(200),
+  date: Joi.date(),
+  time: Joi.string().pattern(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/),
+  max_participants: Joi.number().integer().min(1).max(100).allow(null),
+  tagged_users: Joi.array().items(Joi.string().uuid()),
+  photo_url: Joi.string().uri().allow('', null),
+}).min(1);
+
 const updateProfileSchema = Joi.object({
   display_name: Joi.string().min(2).max(100),
   bio: Joi.string().max(150).allow(''),
@@ -67,5 +79,6 @@ module.exports = {
   signupSchema,
   loginSchema,
   createListingSchema,
+  updateListingSchema,
   updateProfileSchema,
 };

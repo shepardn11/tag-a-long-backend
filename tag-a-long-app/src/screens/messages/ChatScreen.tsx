@@ -115,6 +115,12 @@ export default function ChatScreen({ route, navigation }: any) {
 
   useEffect(() => {
     fetchMessages();
+    const interval = setInterval(() => {
+      messageAPI.getMessages(conversationId).then(data => {
+        setMessages(data);
+      }).catch(() => {});
+    }, 5000);
+    return () => clearInterval(interval);
   }, [conversationId]);
 
   const fetchMessages = async () => {

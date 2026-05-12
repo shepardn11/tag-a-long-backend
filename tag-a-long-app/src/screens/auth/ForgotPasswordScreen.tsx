@@ -18,6 +18,10 @@ export default function ForgotPasswordScreen({ navigation }: Props) {
       Alert.alert('Error', 'Please enter your email address.');
       return;
     }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) {
+      Alert.alert('Error', 'Please enter a valid email address.');
+      return;
+    }
     try {
       setIsLoading(true);
       await apiClient.getInstance().post('/auth/forgot-password', { email: email.trim().toLowerCase() });

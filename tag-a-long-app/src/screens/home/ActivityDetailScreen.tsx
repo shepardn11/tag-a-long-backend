@@ -93,6 +93,7 @@ export default function ActivityDetailScreen({ navigation, route }: Props) {
       setIsLoading(true);
       const data = await listingAPI.getById(activityId);
       setListing(data);
+      if ((data as any).has_requested) setHasRequested(true);
 
       // Mark notifications read for this listing, then refresh both badges
       notificationAPI.markReadForListing(activityId).then(() => refreshTabCounts()).catch(() => {});
@@ -352,13 +353,17 @@ export default function ActivityDetailScreen({ navigation, route }: Props) {
       <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
         {/* Featured Image */}
         <TouchableOpacity activeOpacity={1} onPress={() => setLightboxPhoto(listing.photo_url || listing.profile_photo_url || null)}>
-          <Image
-            source={{
-              uri: listing.photo_url || listing.profile_photo_url || 'https://via.placeholder.com/400x300',
-            }}
-            style={styles.featuredImage}
-            contentFit="cover"
-          />
+          {listing.photo_url || listing.profile_photo_url ? (
+            <Image
+              source={{ uri: listing.photo_url || listing.profile_photo_url }}
+              style={styles.featuredImage}
+              contentFit="cover"
+            />
+          ) : (
+            <View style={[styles.featuredImage, styles.featuredImagePlaceholder]}>
+              <Ionicons name="image-outline" size={64} color="#ccc" />
+            </View>
+          )}
         </TouchableOpacity>
 
         {/* Content */}
@@ -448,7 +453,6 @@ export default function ActivityDetailScreen({ navigation, route }: Props) {
               if (listing.user_id) {
                 navigation.navigate('UserProfile', { userId: listing.user_id });
               } else {
-                console.error('No user_id on listing:', listing);
               }
             }}
           >
@@ -977,6 +981,10 @@ const styles = StyleSheet.create({
     width: '100%',
     height: SCREEN_HEIGHT * 0.45,
     backgroundColor: '#f0f0f0',
+  },
+  featuredImagePlaceholder: {
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   content: {
     padding: 20,

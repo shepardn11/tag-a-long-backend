@@ -16,7 +16,7 @@ const haversineDistance = (lat1, lon1, lat2, lon2) => {
 
 const getFeed = async (req, res, next) => {
   try {
-    const { city, lat, lng, radius = 50, limit = 50, offset = 0, min_age, max_age } = req.query;
+    const { city, lat, lng, radius = 50, limit = 50, offset = 0, min_age, max_age, categories } = req.query;
     const userLat = lat ? parseFloat(lat) : null;
     const userLng = lng ? parseFloat(lng) : null;
     const radiusMiles = parseFloat(radius);
@@ -30,6 +30,12 @@ const getFeed = async (req, res, next) => {
       user_id: { not: req.user.id },
       date: { gte: thirtyMinutesAgo },
     };
+
+    if (categories) {
+      const cats = (Array.isArray(categories) ? categories : categories.split(','))
+        .map(c => c.trim()).filter(Boolean);
+      if (cats.length > 0) where.category = { in: cats };
+    }
 
 
     // Get listings

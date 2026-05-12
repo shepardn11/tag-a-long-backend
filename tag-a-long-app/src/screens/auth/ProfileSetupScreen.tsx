@@ -82,7 +82,6 @@ export default function ProfileSetupScreen({ navigation }: Props) {
         const imageUri = result.assets[0].uri;
 
         if (!user || !user.id) {
-          console.error('DEBUG ProfileSetup: User is null or missing ID!');
           Alert.alert('Error', 'User not found - cannot upload photo');
           throw new Error('User not found - cannot upload photo');
         }
@@ -101,8 +100,6 @@ export default function ProfileSetupScreen({ navigation }: Props) {
         Alert.alert('Success', 'Profile photo uploaded!');
       }
     } catch (error: any) {
-      console.error('DEBUG ProfileSetup: Photo upload error:', error);
-      console.error('DEBUG ProfileSetup: Error details:', error.response?.data);
       Alert.alert('Upload Failed', error.message || 'Could not upload photo. Please try again.');
     } finally {
       setIsUploadingPhoto(false);
@@ -176,8 +173,6 @@ export default function ProfileSetupScreen({ navigation }: Props) {
         Alert.alert('Success', 'Photo added to gallery!');
       }
     } catch (error: any) {
-      console.error('DEBUG ProfileSetup: Gallery photo upload error:', error);
-      console.error('DEBUG ProfileSetup: Error details:', error.response?.data);
       Alert.alert('Upload Failed', error.message || 'Could not upload photo. Please try again.');
     } finally {
       setUploadingGalleryIndex(null);
@@ -239,7 +234,6 @@ export default function ProfileSetupScreen({ navigation }: Props) {
       completeSetup();
 
     } catch (error: any) {
-      console.error('DEBUG: Error in handleComplete:', error);
       Alert.alert(
         'Error',
         error.response?.data?.error?.message || error.message || 'Could not update profile'

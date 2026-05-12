@@ -1,6 +1,7 @@
 // Auth Store - Zustand state management for authentication
 import { create } from 'zustand';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import * as SecureStore from 'expo-secure-store';
 import { User, LoginCredentials, SignupData } from '../types';
 import { authAPI, profileAPI } from '../api/endpoints';
 import apiClient from '../api/client';
@@ -133,7 +134,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     try {
       set({ isLoading: true });
 
-      const token = await AsyncStorage.getItem('auth_token');
+      const token = await SecureStore.getItemAsync('auth_token').catch(() => null);
       const userStr = await AsyncStorage.getItem('user');
 
 

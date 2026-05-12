@@ -1,7 +1,19 @@
 // API Client - Connects to Tag-A-Long Backend
 import axios, { AxiosInstance } from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { Platform } from 'react-native';
+import * as SecureStore from 'expo-secure-store';
+
+const TOKEN_KEY = 'auth_token';
+
+const secureGet = async (key: string) => {
+  try { return await SecureStore.getItemAsync(key); } catch { return null; }
+};
+const secureSet = async (key: string, value: string) => {
+  try { await SecureStore.setItemAsync(key, value); } catch {}
+};
+const secureDelete = async (key: string) => {
+  try { await SecureStore.deleteItemAsync(key); } catch {}
+};
 
 // Use local backend for development, Vercel for production
 // On web: use localhost
@@ -48,7 +60,8 @@ class APIClient {
         if (error.response?.status === 401) {
           // Token expired or revoked — clear everything and navigate to login
           this.authToken = null;
-          await AsyncStorage.multiRemove(['auth_token', 'user', 'profileSetupComplete']);
+          await secureDelete(TOKEN_KEY);
+          await AsyncStorage.multiRemove(['user', 'profileSetupComplete']);
           const { navigateToAuth } = await import('../navigation/navigationRef');
           navigateToAuth();
         }
@@ -57,15 +70,10 @@ class APIClient {
     );
   }
 
-  // Initialize token from AsyncStorage on app start
   private async initializeToken() {
-    try {
-      const token = await AsyncStorage.getItem('auth_token');
-      if (token) {
-        this.authToken = token;
-      }
-    } catch (error) {
-      console.error('Error initializing auth token:', error);
+    const token = await secureGet(TOKEN_KEY);
+    if (token) {
+      this.authToken = token;
     }
   }
 
@@ -77,13 +85,12 @@ class APIClient {
   // Set auth token (updates both memory and storage)
   async setAuthToken(token: string) {
     this.authToken = token;
-    await AsyncStorage.setItem('auth_token', token);
+    await secureSet(TOKEN_KEY, token);
   }
 
-  // Clear auth token (clears both memory and storage)
   async clearAuthToken() {
     this.authToken = null;
-    await AsyncStorage.removeItem('auth_token');
+    await secureDelete(TOKEN_KEY);
     await AsyncStorage.removeItem('user');
   }
 }

@@ -2,6 +2,7 @@
   "expo": {
     "name": "Tag-A-Long",
     "slug": "tag-a-long-app",
+    "scheme": "tagalong",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -15,11 +16,15 @@
       "supportsTablet": false,
       "bundleIdentifier": "com.tagalong.app",
       "buildNumber": "1",
+      "entitlements": {
+        "aps-environment": "production"
+      },
       "infoPlist": {
         "NSLocationWhenInUseUsageDescription": "Tag-A-Long uses your location to show you activities happening nearby.",
-        "NSCameraUsageDescription": "Tag-A-Long uses your camera to let you take a profile photo.",
-        "NSPhotoLibraryUsageDescription": "Tag-A-Long accesses your photo library to let you choose a profile photo.",
-        "NSPhotoLibraryAddUsageDescription": "Tag-A-Long saves photos to your library."
+        "NSCameraUsageDescription": "Tag-A-Long uses your camera to take a photo for your activity or profile.",
+        "NSPhotoLibraryUsageDescription": "Tag-A-Long accesses your photo library to let you choose a profile or activity photo.",
+        "NSPhotoLibraryAddUsageDescription": "Tag-A-Long saves photos to your library.",
+        "NSUserNotificationsUsageDescription": "Tag-A-Long sends you notifications when someone requests to join your activity or your request is accepted."
       }
     },
     "android": {
@@ -44,6 +49,10 @@
     },
     "web": {
       "favicon": "./assets/favicon.png"
-    }
+    },
+    "plugins": [
+      "expo-secure-store",
+      "expo-notifications"
+    ]
   }
 }

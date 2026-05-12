@@ -190,6 +190,7 @@ export default function FeedScreen({ navigation }: Props) {
         ...(userCoords ? { lat: userCoords.lat, lng: userCoords.lng, radius } : { city: user?.city }),
         ...(minAge !== null ? { min_age: minAge } : {}),
         ...(maxAge !== null ? { max_age: maxAge } : {}),
+        ...(selectedCategories.length > 0 ? { categories: selectedCategories.join(',') } : {}),
       };
       const data = await listingAPI.getFeed(20, 0, options);
       setListings(data);
@@ -200,15 +201,11 @@ export default function FeedScreen({ navigation }: Props) {
       setIsLoading(false);
       setIsRefreshing(false);
     }
-  }, [userCoords, radius, user?.city, minAge, maxAge]);
+  }, [userCoords, radius, user?.city, minAge, maxAge, selectedCategories]);
 
   useEffect(() => {
     fetchListings();
-  }, [radius, userCoords, minAge, maxAge]);
-
-  useEffect(() => {
-    fetchListings();
-  }, []);
+  }, [radius, userCoords, minAge, maxAge, selectedCategories]);
 
   useEffect(() => {
     if (filterVisible) {
@@ -460,7 +457,7 @@ export default function FeedScreen({ navigation }: Props) {
         renderError()
       ) : (
         <FlatList
-          data={selectedCategories.length > 0 ? listings.filter(l => selectedCategories.includes(l.category)) : listings}
+          data={listings}
           keyExtractor={(item) => item.id}
           renderItem={({ item }) => (
             <ListingCard

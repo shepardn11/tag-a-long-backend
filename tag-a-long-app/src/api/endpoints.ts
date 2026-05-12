@@ -91,7 +91,7 @@ export const profileAPI = {
 
 export const listingAPI = {
   // Get feed (with premium priority)
-  getFeed: async (limit = 20, offset = 0, options?: { lat?: number; lng?: number; radius?: number; city?: string; min_age?: number; max_age?: number }): Promise<ActivityListing[]> => {
+  getFeed: async (limit = 20, offset = 0, options?: { lat?: number; lng?: number; radius?: number; city?: string; min_age?: number; max_age?: number; categories?: string }): Promise<ActivityListing[]> => {
     const response = await api.get('/listings/feed', {
       params: { limit, offset, ...options },
     });

@@ -66,8 +66,6 @@ export default function UserProfileScreen({ navigation, route }: Props) {
       const userData = await profileAPI.getUserById(id);
       setUser(userData);
     } catch (err: any) {
-      console.error('Fetch user profile error:', err);
-      console.error('Error response:', err.response?.data);
       setError(err.response?.data?.error?.message || 'Could not load profile');
     } finally {
       setIsLoading(false);

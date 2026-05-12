@@ -29,6 +29,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { listingAPI, notificationAPI } from '../../api/endpoints';
 import ListingCard from '../../components/ListingCard';
 import { useAuthStore } from '../../store/authStore';
+import { registerBellRefresh } from '../../utils/tabRefresh';
 
 const HEADER_HEIGHT = 72;
 
@@ -220,11 +221,19 @@ export default function FeedScreen({ navigation }: Props) {
     }
   }, [filterVisible]);
 
+  const refreshBell = useCallback(() => {
+    notificationAPI.getUnreadCount().then(setUnreadNotifications).catch(() => {});
+  }, []);
+
+  useEffect(() => {
+    registerBellRefresh(refreshBell);
+  }, [refreshBell]);
+
   useFocusEffect(
     useCallback(() => {
       fetchListings();
-      notificationAPI.getUnreadCount().then(setUnreadNotifications).catch(() => {});
-    }, [fetchListings])
+      refreshBell();
+    }, [fetchListings, refreshBell])
   );
 
   const handleRefresh = useCallback(() => {

@@ -270,6 +270,17 @@ const getMessages = async (req, res, next) => {
       data: { is_read: true },
     });
 
+    // Mark any activity_shared notifications for this conversation as read
+    await prisma.notification.updateMany({
+      where: {
+        user_id: userId,
+        type: 'activity_shared',
+        is_read: false,
+        data: { contains: conversation_id },
+      },
+      data: { is_read: true },
+    });
+
     res.json({
       success: true,
       data: messages.reverse(), // Reverse to show oldest first

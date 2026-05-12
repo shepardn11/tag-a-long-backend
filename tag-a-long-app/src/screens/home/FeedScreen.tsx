@@ -30,6 +30,7 @@ import { listingAPI, notificationAPI } from '../../api/endpoints';
 import ListingCard from '../../components/ListingCard';
 import { useAuthStore } from '../../store/authStore';
 import { registerBellRefresh } from '../../utils/tabRefresh';
+import DateTimePicker from '@react-native-community/datetimepicker';
 
 const HEADER_HEIGHT = 72;
 
@@ -42,23 +43,33 @@ interface Props {
 const RADIUS_OPTIONS = [10, 25, 50, 100];
 
 const DAY_OPTIONS = [
-  { value: 'any', label: 'Any day' },
   { value: 'today', label: 'Today' },
   { value: 'tomorrow', label: 'Tomorrow' },
   { value: 'this_week', label: 'This week' },
 ];
 
-const getDayRange = (day: string) => {
-  if (day === 'any') return {};
+const getDayRange = (days: string[], specificDate: Date | null) => {
+  if (specificDate) {
+    const start = new Date(specificDate.getFullYear(), specificDate.getMonth(), specificDate.getDate());
+    const end = new Date(start); end.setDate(end.getDate() + 1);
+    return { date_from: start.toISOString(), date_to: end.toISOString() };
+  }
+  if (days.length === 0) return {};
   const now = new Date();
   const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
   const tomorrow = new Date(todayStart); tomorrow.setDate(tomorrow.getDate() + 1);
   const dayAfterTomorrow = new Date(tomorrow); dayAfterTomorrow.setDate(dayAfterTomorrow.getDate() + 1);
   const weekEnd = new Date(todayStart); weekEnd.setDate(weekEnd.getDate() + 7);
-  if (day === 'today') return { date_from: now.toISOString(), date_to: tomorrow.toISOString() };
-  if (day === 'tomorrow') return { date_from: tomorrow.toISOString(), date_to: dayAfterTomorrow.toISOString() };
-  if (day === 'this_week') return { date_from: now.toISOString(), date_to: weekEnd.toISOString() };
-  return {};
+  const ranges = days.map(day => {
+    if (day === 'today') return { from: now, to: tomorrow };
+    if (day === 'tomorrow') return { from: tomorrow, to: dayAfterTomorrow };
+    if (day === 'this_week') return { from: now, to: weekEnd };
+    return null;
+  }).filter((r): r is { from: Date; to: Date } => r !== null);
+  if (ranges.length === 0) return {};
+  const minFrom = ranges.reduce((min, r) => r.from < min ? r.from : min, ranges[0].from);
+  const maxTo = ranges.reduce((max, r) => r.to > max ? r.to : max, ranges[0].to);
+  return { date_from: minFrom.toISOString(), date_to: maxTo.toISOString() };
 };
 const RADIUS_KEY = 'feed_radius_miles';
 
@@ -98,8 +109,11 @@ export default function FeedScreen({ navigation }: Props) {
   const [draftMinAge, setDraftMinAge] = useState('');
   const [draftMaxAge, setDraftMaxAge] = useState('');
   const [draftCategories, setDraftCategories] = useState<string[]>([]);
-  const [selectedDay, setSelectedDay] = useState('any');
-  const [draftDay, setDraftDay] = useState('any');
+  const [selectedDays, setSelectedDays] = useState<string[]>([]);
+  const [draftDays, setDraftDays] = useState<string[]>([]);
+  const [specificDate, setSpecificDate] = useState<Date | null>(null);
+  const [draftSpecificDate, setDraftSpecificDate] = useState<Date | null>(null);
+  const [showDayPicker, setShowDayPicker] = useState(false);
   const { user } = useAuthStore();
   const locationInitialized = useRef(false);
   const headerHeight = useRef(new Animated.Value(HEADER_HEIGHT)).current;
@@ -160,7 +174,7 @@ export default function FeedScreen({ navigation }: Props) {
     }
   }, []);
 
-  const filtersActive = radius !== 50 || minAge !== null || maxAge !== null || selectedCategories.length > 0 || selectedDay !== 'any';
+  const filtersActive = radius !== 50 || minAge !== null || maxAge !== null || selectedCategories.length > 0 || selectedDays.length > 0 || specificDate !== null;
 
   const requestLocation = async () => {
     const { status: existing } = await Location.getForegroundPermissionsAsync();
@@ -221,7 +235,7 @@ export default function FeedScreen({ navigation }: Props) {
         ...(minAge !== null ? { min_age: minAge } : {}),
         ...(maxAge !== null ? { max_age: maxAge } : {}),
         ...(selectedCategories.length > 0 ? { categories: selectedCategories.join(',') } : {}),
-        ...getDayRange(selectedDay),
+        ...getDayRange(selectedDays, specificDate),
       };
       const data = await listingAPI.getFeed(20, 0, options);
       setListings(data);
@@ -232,11 +246,11 @@ export default function FeedScreen({ navigation }: Props) {
       setIsLoading(false);
       setIsRefreshing(false);
     }
-  }, [userCoords, radius, user?.city, minAge, maxAge, selectedCategories, selectedDay]);
+  }, [userCoords, radius, user?.city, minAge, maxAge, selectedCategories, selectedDays, specificDate]);
 
   useEffect(() => {
     fetchListings();
-  }, [radius, userCoords, minAge, maxAge, selectedCategories, selectedDay]);
+  }, [radius, userCoords, minAge, maxAge, selectedCategories, selectedDays, specificDate]);
 
   useEffect(() => {
     if (filterVisible) {
@@ -275,7 +289,8 @@ export default function FeedScreen({ navigation }: Props) {
     setDraftMinAge(minAge !== null ? String(minAge) : '');
     setDraftMaxAge(maxAge !== null ? String(maxAge) : '');
     setDraftCategories([...selectedCategories]);
-    setDraftDay(selectedDay);
+    setDraftDays([...selectedDays]);
+    setDraftSpecificDate(specificDate);
     setFilterVisible(true);
   };
 
@@ -301,7 +316,8 @@ export default function FeedScreen({ navigation }: Props) {
     setMinAge(parsedMin);
     setMaxAge(parsedMax);
     setSelectedCategories(draftCategories);
-    setSelectedDay(draftDay);
+    setSelectedDays(draftDays);
+    setSpecificDate(draftSpecificDate);
     setFilterVisible(false);
   };
 
@@ -310,7 +326,8 @@ export default function FeedScreen({ navigation }: Props) {
     setDraftMinAge('');
     setDraftMaxAge('');
     setDraftCategories([]);
-    setDraftDay('any');
+    setDraftDays([]);
+    setDraftSpecificDate(null);
   };
 
   const renderHeader = () => (
@@ -369,18 +386,58 @@ export default function FeedScreen({ navigation }: Props) {
           <ScrollView showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
             <Text style={styles.sectionLabel}>When</Text>
             <View style={styles.chipRow}>
-              {DAY_OPTIONS.map(opt => (
-                <TouchableOpacity
-                  key={opt.value}
-                  style={[styles.filterChip, draftDay === opt.value && styles.filterChipActive]}
-                  onPress={() => setDraftDay(opt.value)}
-                >
-                  <Text style={[styles.filterChipText, draftDay === opt.value && styles.filterChipTextActive]}>
-                    {opt.label}
-                  </Text>
-                </TouchableOpacity>
-              ))}
+              {DAY_OPTIONS.map(opt => {
+                const active = draftDays.includes(opt.value);
+                return (
+                  <TouchableOpacity
+                    key={opt.value}
+                    style={[styles.filterChip, active && styles.filterChipActive]}
+                    onPress={() => {
+                      setDraftSpecificDate(null);
+                      setDraftDays(prev =>
+                        active ? prev.filter(d => d !== opt.value) : [...prev, opt.value]
+                      );
+                    }}
+                  >
+                    <Text style={[styles.filterChipText, active && styles.filterChipTextActive]}>
+                      {opt.label}
+                    </Text>
+                  </TouchableOpacity>
+                );
+              })}
+              <TouchableOpacity
+                style={[styles.filterChip, draftSpecificDate !== null && styles.filterChipActive]}
+                onPress={() => setShowDayPicker(true)}
+              >
+                <Ionicons name="calendar-outline" size={14} color={draftSpecificDate ? '#fff' : '#333'} />
+                <Text style={[styles.filterChipText, draftSpecificDate !== null && styles.filterChipTextActive, { marginLeft: 4 }]}>
+                  {draftSpecificDate
+                    ? draftSpecificDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+                    : 'Pick date'}
+                </Text>
+                {draftSpecificDate && (
+                  <TouchableOpacity
+                    onPress={() => setDraftSpecificDate(null)}
+                    hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+                  >
+                    <Ionicons name="close-circle" size={14} color="rgba(255,255,255,0.8)" style={{ marginLeft: 4 }} />
+                  </TouchableOpacity>
+                )}
+              </TouchableOpacity>
             </View>
+
+            {Platform.OS === 'android' && showDayPicker && (
+              <DateTimePicker
+                value={draftSpecificDate || new Date()}
+                mode="date"
+                display="default"
+                minimumDate={new Date()}
+                onChange={(e, d) => {
+                  setShowDayPicker(false);
+                  if (e.type !== 'dismissed' && d) { setDraftSpecificDate(d); setDraftDays([]); }
+                }}
+              />
+            )}
 
             <Text style={styles.sectionLabel}>Distance</Text>
             {!userCoords && (
@@ -458,6 +515,26 @@ export default function FeedScreen({ navigation }: Props) {
           <TouchableOpacity style={styles.applyButton} onPress={applyFilter}>
             <Text style={styles.applyButtonText}>Apply Filters</Text>
           </TouchableOpacity>
+
+          {Platform.OS === 'ios' && showDayPicker && (
+            <TouchableOpacity style={styles.pickerBackdrop} activeOpacity={1} onPress={() => setShowDayPicker(false)}>
+              <View style={styles.pickerSheet} onStartShouldSetResponder={() => true}>
+                <DateTimePicker
+                  value={draftSpecificDate || new Date()}
+                  mode="date"
+                  display="inline"
+                  minimumDate={new Date()}
+                  accentColor="#E8572A"
+                  onChange={(_, d) => { if (d) { setDraftSpecificDate(d); setDraftDays([]); } }}
+                />
+                <View style={styles.pickerFooter}>
+                  <TouchableOpacity onPress={() => setShowDayPicker(false)}>
+                    <Text style={styles.pickerDone}>Done</Text>
+                  </TouchableOpacity>
+                </View>
+              </View>
+            </TouchableOpacity>
+          )}
         </Animated.View>
       </KeyboardAvoidingView>
     </Modal>
@@ -717,6 +794,32 @@ const styles = StyleSheet.create({
     fontSize: 20,
     color: '#aaa',
     fontWeight: '300',
+  },
+  pickerBackdrop: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: 'rgba(0,0,0,0.4)',
+    justifyContent: 'flex-end',
+    zIndex: 10,
+  },
+  pickerSheet: {
+    backgroundColor: '#fff',
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    paddingHorizontal: 8,
+    paddingBottom: 40,
+  },
+  pickerFooter: {
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+    paddingHorizontal: 20,
+    paddingVertical: 14,
+    borderTopWidth: 1,
+    borderTopColor: '#e0e0e0',
+  },
+  pickerDone: {
+    fontSize: 17,
+    fontWeight: '600',
+    color: '#E8572A',
   },
   applyButton: {
     backgroundColor: '#E8572A',

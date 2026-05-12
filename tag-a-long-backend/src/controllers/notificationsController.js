@@ -208,12 +208,38 @@ const markReadForListing = async (req, res, next) => {
   }
 };
 
+const deleteNotification = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+
+    const notification = await prisma.notification.findUnique({
+      where: { id },
+      select: { user_id: true },
+    });
+
+    if (!notification) {
+      return res.status(404).json({ success: false, error: { code: 'NOT_FOUND', message: 'Notification not found' } });
+    }
+
+    if (notification.user_id !== req.user.id) {
+      return res.status(403).json({ success: false, error: { code: 'FORBIDDEN', message: 'Not your notification' } });
+    }
+
+    await prisma.notification.delete({ where: { id } });
+
+    res.json({ success: true });
+  } catch (error) {
+    next(error);
+  }
+};
+
 module.exports = {
   getNotifications,
   getUnreadCount,
   markAsRead,
   markAllAsRead,
   markReadForListing,
+  deleteNotification,
   registerToken,
   unregisterToken,
 };

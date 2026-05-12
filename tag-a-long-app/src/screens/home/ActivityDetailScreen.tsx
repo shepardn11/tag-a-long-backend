@@ -140,6 +140,17 @@ export default function ActivityDetailScreen({ navigation, route }: Props) {
     try {
       await requestAPI.accept(requestId);
       Alert.alert('Accepted!', 'You accepted the Tag-A-Long request');
+
+      // Immediately add the accepted user to the who's joining list
+      const acceptedRequest = requests.find(r => r.id === requestId);
+      if (acceptedRequest && listing) {
+        const currentAccepted = (listing as any).accepted_participants || [];
+        const alreadyThere = currentAccepted.some((p: any) => p.id === acceptedRequest.requester.id);
+        if (!alreadyThere) {
+          setListing({ ...listing, accepted_participants: [...currentAccepted, acceptedRequest.requester] } as any);
+        }
+      }
+
       await fetchRequests();
       refreshTabCounts();
     } catch (error: any) {

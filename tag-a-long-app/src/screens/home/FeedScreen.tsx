@@ -431,7 +431,7 @@ export default function FeedScreen({ navigation }: Props) {
                 value={draftSpecificDate || new Date()}
                 mode="date"
                 display="default"
-                minimumDate={new Date()}
+                minimumDate={new Date(new Date().setHours(0, 0, 0, 0))}
                 onChange={(e, d) => {
                   setShowDayPicker(false);
                   if (e.type !== 'dismissed' && d) { setDraftSpecificDate(d); setDraftDays([]); }
@@ -523,7 +523,7 @@ export default function FeedScreen({ navigation }: Props) {
                   value={draftSpecificDate || new Date()}
                   mode="date"
                   display="inline"
-                  minimumDate={new Date()}
+                  minimumDate={new Date(new Date().setHours(0, 0, 0, 0))}
                   accentColor="#E8572A"
                   onChange={(_, d) => { if (d) { setDraftSpecificDate(d); setDraftDays([]); } }}
                 />

@@ -161,7 +161,7 @@ export default function ListingCard({ listing, onPress, pendingRequestCount }: L
             </View>
           )}
 
-          <View style={[styles.infoItem, styles.infoItemFull]}>
+          <View style={styles.infoItem}>
             <Ionicons name="location" size={18} color="#fff" />
             <Text style={styles.infoText} numberOfLines={1}>
               {listing.location}

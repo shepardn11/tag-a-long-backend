@@ -16,19 +16,25 @@ const haversineDistance = (lat1, lon1, lat2, lon2) => {
 
 const getFeed = async (req, res, next) => {
   try {
-    const { city, lat, lng, radius = 50, limit = 50, offset = 0, min_age, max_age, categories } = req.query;
+    const { city, lat, lng, radius = 50, limit = 50, offset = 0, min_age, max_age, categories, date_from, date_to } = req.query;
     const userLat = lat ? parseFloat(lat) : null;
     const userLng = lng ? parseFloat(lng) : null;
     const radiusMiles = parseFloat(radius);
 
-    // Pre-filter at DB level: only fetch activities whose date is within the
-    // 30-min grace window or still in the future. This ensures near-future
-    // activities aren't crowded out by past ones when sorting by date asc.
     const thirtyMinutesAgo = new Date(Date.now() - 30 * 60 * 1000);
+    const dateFilter = { gte: thirtyMinutesAgo };
+    if (date_from) {
+      const from = new Date(date_from);
+      if (from > thirtyMinutesAgo) dateFilter.gte = from;
+    }
+    if (date_to) {
+      dateFilter.lte = new Date(date_to);
+    }
+
     const where = {
       is_active: true,
       user_id: { not: req.user.id },
-      date: { gte: thirtyMinutesAgo },
+      date: dateFilter,
     };
 
     if (categories) {

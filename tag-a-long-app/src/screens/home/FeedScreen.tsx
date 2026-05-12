@@ -40,6 +40,26 @@ interface Props {
 }
 
 const RADIUS_OPTIONS = [10, 25, 50, 100];
+
+const DAY_OPTIONS = [
+  { value: 'any', label: 'Any day' },
+  { value: 'today', label: 'Today' },
+  { value: 'tomorrow', label: 'Tomorrow' },
+  { value: 'this_week', label: 'This week' },
+];
+
+const getDayRange = (day: string) => {
+  if (day === 'any') return {};
+  const now = new Date();
+  const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const tomorrow = new Date(todayStart); tomorrow.setDate(tomorrow.getDate() + 1);
+  const dayAfterTomorrow = new Date(tomorrow); dayAfterTomorrow.setDate(dayAfterTomorrow.getDate() + 1);
+  const weekEnd = new Date(todayStart); weekEnd.setDate(weekEnd.getDate() + 7);
+  if (day === 'today') return { date_from: now.toISOString(), date_to: tomorrow.toISOString() };
+  if (day === 'tomorrow') return { date_from: tomorrow.toISOString(), date_to: dayAfterTomorrow.toISOString() };
+  if (day === 'this_week') return { date_from: now.toISOString(), date_to: weekEnd.toISOString() };
+  return {};
+};
 const RADIUS_KEY = 'feed_radius_miles';
 
 const CATEGORIES = [
@@ -78,6 +98,8 @@ export default function FeedScreen({ navigation }: Props) {
   const [draftMinAge, setDraftMinAge] = useState('');
   const [draftMaxAge, setDraftMaxAge] = useState('');
   const [draftCategories, setDraftCategories] = useState<string[]>([]);
+  const [selectedDay, setSelectedDay] = useState('any');
+  const [draftDay, setDraftDay] = useState('any');
   const { user } = useAuthStore();
   const locationInitialized = useRef(false);
   const headerHeight = useRef(new Animated.Value(HEADER_HEIGHT)).current;
@@ -138,7 +160,7 @@ export default function FeedScreen({ navigation }: Props) {
     }
   }, []);
 
-  const filtersActive = radius !== 50 || minAge !== null || maxAge !== null || selectedCategories.length > 0;
+  const filtersActive = radius !== 50 || minAge !== null || maxAge !== null || selectedCategories.length > 0 || selectedDay !== 'any';
 
   const requestLocation = async () => {
     const { status: existing } = await Location.getForegroundPermissionsAsync();
@@ -194,6 +216,7 @@ export default function FeedScreen({ navigation }: Props) {
         ...(minAge !== null ? { min_age: minAge } : {}),
         ...(maxAge !== null ? { max_age: maxAge } : {}),
         ...(selectedCategories.length > 0 ? { categories: selectedCategories.join(',') } : {}),
+        ...getDayRange(selectedDay),
       };
       const data = await listingAPI.getFeed(20, 0, options);
       setListings(data);
@@ -204,11 +227,11 @@ export default function FeedScreen({ navigation }: Props) {
       setIsLoading(false);
       setIsRefreshing(false);
     }
-  }, [userCoords, radius, user?.city, minAge, maxAge, selectedCategories]);
+  }, [userCoords, radius, user?.city, minAge, maxAge, selectedCategories, selectedDay]);
 
   useEffect(() => {
     fetchListings();
-  }, [radius, userCoords, minAge, maxAge, selectedCategories]);
+  }, [radius, userCoords, minAge, maxAge, selectedCategories, selectedDay]);
 
   useEffect(() => {
     if (filterVisible) {
@@ -247,6 +270,7 @@ export default function FeedScreen({ navigation }: Props) {
     setDraftMinAge(minAge !== null ? String(minAge) : '');
     setDraftMaxAge(maxAge !== null ? String(maxAge) : '');
     setDraftCategories([...selectedCategories]);
+    setDraftDay(selectedDay);
     setFilterVisible(true);
   };
 
@@ -272,6 +296,7 @@ export default function FeedScreen({ navigation }: Props) {
     setMinAge(parsedMin);
     setMaxAge(parsedMax);
     setSelectedCategories(draftCategories);
+    setSelectedDay(draftDay);
     setFilterVisible(false);
   };
 
@@ -280,6 +305,7 @@ export default function FeedScreen({ navigation }: Props) {
     setDraftMinAge('');
     setDraftMaxAge('');
     setDraftCategories([]);
+    setDraftDay('any');
   };
 
   const renderHeader = () => (
@@ -336,6 +362,21 @@ export default function FeedScreen({ navigation }: Props) {
           </View>
 
           <ScrollView showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
+            <Text style={styles.sectionLabel}>When</Text>
+            <View style={styles.chipRow}>
+              {DAY_OPTIONS.map(opt => (
+                <TouchableOpacity
+                  key={opt.value}
+                  style={[styles.filterChip, draftDay === opt.value && styles.filterChipActive]}
+                  onPress={() => setDraftDay(opt.value)}
+                >
+                  <Text style={[styles.filterChipText, draftDay === opt.value && styles.filterChipTextActive]}>
+                    {opt.label}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+
             <Text style={styles.sectionLabel}>Distance</Text>
             {!userCoords && (
               <TouchableOpacity style={styles.locationPrompt} onPress={requestLocation}>

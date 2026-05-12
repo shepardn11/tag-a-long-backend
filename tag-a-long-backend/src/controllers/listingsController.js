@@ -43,6 +43,21 @@ const getFeed = async (req, res, next) => {
       if (cats.length > 0) where.category = { in: cats };
     }
 
+    // Bounding-box pre-filter: narrow the DB result set before JS haversine check.
+    // Listings without coordinates still pass through (shown by city fallback).
+    if (userLat !== null && userLng !== null) {
+      const latDelta = radiusMiles / 69;
+      const lngDelta = radiusMiles / (Math.cos(userLat * Math.PI / 180) * 69);
+      where.OR = [
+        { latitude: null },
+        { longitude: null },
+        {
+          latitude: { gte: userLat - latDelta, lte: userLat + latDelta },
+          longitude: { gte: userLng - lngDelta, lte: userLng + lngDelta },
+        },
+      ];
+    }
+
 
     // Get listings
     const listings = await prisma.listing.findMany({

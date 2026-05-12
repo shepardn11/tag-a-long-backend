@@ -97,6 +97,9 @@ export default function FeedScreen({ navigation }: Props) {
   const [listings, setListings] = useState<ActivityListing[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [isFetchingMore, setIsFetchingMore] = useState(false);
+  const [hasMore, setHasMore] = useState(true);
+  const dbOffsetRef = useRef(0);
   const [error, setError] = useState<string | null>(null);
   const [radius, setRadius] = useState(50);
   const [userCoords, setUserCoords] = useState<{ lat: number; lng: number } | null>(null);
@@ -222,23 +225,27 @@ export default function FeedScreen({ navigation }: Props) {
     }
   }, []);
 
+  const buildOptions = useCallback(() => ({
+    ...(userCoords ? { lat: userCoords.lat, lng: userCoords.lng, radius } : { city: user?.city }),
+    ...(minAge !== null ? { min_age: minAge } : {}),
+    ...(maxAge !== null ? { max_age: maxAge } : {}),
+    ...(selectedCategories.length > 0 ? { categories: selectedCategories.join(',') } : {}),
+    ...getDayRange(selectedDays, specificDate),
+  }), [userCoords, radius, user?.city, minAge, maxAge, selectedCategories, selectedDays, specificDate]);
+
   const fetchListings = useCallback(async () => {
-    // Always restore the header when fetching new data so it isn't stuck hidden
+    dbOffsetRef.current = 0;
+    setHasMore(true);
     if (!isHeaderVisible.current) {
       isHeaderVisible.current = true;
       headerHeight.setValue(HEADER_HEIGHT);
     }
     try {
       setError(null);
-      const options = {
-        ...(userCoords ? { lat: userCoords.lat, lng: userCoords.lng, radius } : { city: user?.city }),
-        ...(minAge !== null ? { min_age: minAge } : {}),
-        ...(maxAge !== null ? { max_age: maxAge } : {}),
-        ...(selectedCategories.length > 0 ? { categories: selectedCategories.join(',') } : {}),
-        ...getDayRange(selectedDays, specificDate),
-      };
-      const data = await listingAPI.getFeed(20, 0, options);
-      setListings(data);
+      const data = await listingAPI.getFeed(20, 0, buildOptions());
+      setListings(data.listings);
+      setHasMore(data.has_more);
+      dbOffsetRef.current = 20;
     } catch (err: any) {
       console.error('Fetch listings error:', err);
       setError(err.response?.data?.error?.message || 'Could not load activities');
@@ -246,7 +253,19 @@ export default function FeedScreen({ navigation }: Props) {
       setIsLoading(false);
       setIsRefreshing(false);
     }
-  }, [userCoords, radius, user?.city, minAge, maxAge, selectedCategories, selectedDays, specificDate]);
+  }, [buildOptions]);
+
+  const loadMore = useCallback(async () => {
+    if (!hasMore || isFetchingMore || isLoading) return;
+    setIsFetchingMore(true);
+    try {
+      const data = await listingAPI.getFeed(20, dbOffsetRef.current, buildOptions());
+      setListings(prev => [...prev, ...data.listings]);
+      setHasMore(data.has_more);
+      dbOffsetRef.current += 20;
+    } catch {}
+    finally { setIsFetchingMore(false); }
+  }, [hasMore, isFetchingMore, isLoading, buildOptions]);
 
   useEffect(() => {
     fetchListings();
@@ -605,6 +624,13 @@ export default function FeedScreen({ navigation }: Props) {
           scrollEventThrottle={16}
           showsVerticalScrollIndicator={false}
           decelerationRate="normal"
+          onEndReached={loadMore}
+          onEndReachedThreshold={0.4}
+          ListFooterComponent={isFetchingMore ? (
+            <View style={styles.footerLoader}>
+              <ActivityIndicator size="small" color="#E8572A" />
+            </View>
+          ) : null}
         />
       )}
     </SafeAreaView>
@@ -846,6 +872,10 @@ const styles = StyleSheet.create({
   listContent: {
     paddingTop: 0,
     flexGrow: 1,
+  },
+  footerLoader: {
+    paddingVertical: 20,
+    alignItems: 'center',
   },
   emptyState: {
     flex: 1,

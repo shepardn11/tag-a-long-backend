@@ -13,6 +13,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useFocusEffect } from '@react-navigation/native';
 import { notificationAPI } from '../../api/endpoints';
 import { navigationRef } from '../../navigation/navigationRef';
+import { refreshTabCounts } from '../../utils/tabRefresh';
 
 interface Notification {
   id: string;
@@ -63,6 +64,7 @@ export default function NotificationsScreen({ navigation }: any) {
   const handleMarkAllRead = async () => {
     await notificationAPI.markAllAsRead();
     setNotifications(prev => prev.map(n => ({ ...n, is_read: true })));
+    refreshTabCounts();
   };
 
   const handleTap = async (item: Notification) => {
@@ -71,6 +73,7 @@ export default function NotificationsScreen({ navigation }: any) {
       setNotifications(prev =>
         prev.map(n => n.id === item.id ? { ...n, is_read: true } : n)
       );
+      refreshTabCounts();
     }
 
     try {

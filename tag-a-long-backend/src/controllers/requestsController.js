@@ -271,6 +271,17 @@ const acceptRequest = async (req, res, next) => {
       },
     });
 
+    // Mark the request_received notification as read for the listing owner
+    await prisma.notification.updateMany({
+      where: {
+        user_id: req.user.id,
+        type: 'request_received',
+        is_read: false,
+        data: { contains: request.id },
+      },
+      data: { is_read: true },
+    });
+
     // Create or get conversation between the two users
     const [participant1, participant2] = [request.listing.user_id, request.requester_id].sort();
 
@@ -388,6 +399,17 @@ const rejectRequest = async (req, res, next) => {
         status: 'rejected',
         responded_at: new Date(),
       },
+    });
+
+    // Mark the request_received notification as read for the listing owner
+    await prisma.notification.updateMany({
+      where: {
+        user_id: req.user.id,
+        type: 'request_received',
+        is_read: false,
+        data: { contains: request.id },
+      },
+      data: { is_read: true },
     });
 
     // Create in-app notification

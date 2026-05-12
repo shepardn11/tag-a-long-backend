@@ -125,12 +125,14 @@ function MainTabs() {
     }
   };
 
-  // Fetch pending request count
+  // Fetch pending request count via unread request_received notifications
   const fetchPendingRequests = async () => {
     try {
-      const { requestAPI } = await import('../api/endpoints');
-      const data = await requestAPI.getReceived('pending');
-      setPendingRequestsCount(data.requests?.length || 0);
+      const { notificationAPI } = await import('../api/endpoints');
+      const result = await notificationAPI.getAll(true) as any;
+      const notifs: any[] = result.notifications ?? result ?? [];
+      const count = notifs.filter((n: any) => n.type === 'request_received').length;
+      setPendingRequestsCount(count);
     } catch (error) {
       console.error('Error fetching pending requests:', error);
     }

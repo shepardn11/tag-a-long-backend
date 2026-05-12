@@ -206,6 +206,18 @@ const searchUsers = async (req, res, next) => {
   }
 };
 
+const isValidStorageUrl = (url) => {
+  try {
+    const parsed = new URL(url);
+    if (parsed.protocol !== 'https:') return false;
+    const supabaseUrl = process.env.SUPABASE_URL || '';
+    if (supabaseUrl && !url.startsWith(supabaseUrl)) return false;
+    return true;
+  } catch {
+    return false;
+  }
+};
+
 const uploadProfilePhoto = async (req, res, next) => {
   try {
     const { photo_url } = req.body;
@@ -217,6 +229,13 @@ const uploadProfilePhoto = async (req, res, next) => {
           code: 'NO_PHOTO_URL',
           message: 'Photo URL is required',
         },
+      });
+    }
+
+    if (!isValidStorageUrl(photo_url)) {
+      return res.status(400).json({
+        success: false,
+        error: { code: 'INVALID_PHOTO_URL', message: 'Invalid photo URL' },
       });
     }
 
@@ -251,7 +270,7 @@ const addGalleryPhoto = async (req, res, next) => {
   try {
     const { photo_url } = req.body;
 
-    if (!photo_url) {
+    if (!photo_url || !isValidStorageUrl(photo_url)) {
       return res.status(400).json({
         success: false,
         error: {

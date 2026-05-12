@@ -9,6 +9,7 @@ import {
   ActivityIndicator,
   RefreshControl,
 } from 'react-native';
+import { Swipeable } from 'react-native-gesture-handler';
 import { Ionicons } from '@expo/vector-icons';
 import { useFocusEffect } from '@react-navigation/native';
 import { notificationAPI } from '../../api/endpoints';
@@ -60,6 +61,16 @@ export default function NotificationsScreen({ navigation }: any) {
   };
 
   useFocusEffect(useCallback(() => { fetchNotifications(); }, []));
+
+  const handleDelete = async (id: string) => {
+    setNotifications(prev => prev.filter(n => n.id !== id));
+    try {
+      await notificationAPI.delete(id);
+      refreshTabCounts();
+    } catch {
+      fetchNotifications(true);
+    }
+  };
 
   const handleMarkAllRead = async () => {
     await notificationAPI.markAllAsRead();
@@ -121,21 +132,31 @@ export default function NotificationsScreen({ navigation }: any) {
   const renderItem = ({ item }: { item: Notification }) => {
     const icon = TYPE_ICON[item.type] ?? { name: 'notifications' as const, color: '#999' };
     return (
-      <TouchableOpacity
-        style={[styles.row, !item.is_read && styles.rowUnread]}
-        onPress={() => handleTap(item)}
-        activeOpacity={0.7}
+      <Swipeable
+        renderRightActions={() => (
+          <TouchableOpacity style={styles.deleteAction} onPress={() => handleDelete(item.id)}>
+            <Ionicons name="trash-outline" size={22} color="#fff" />
+            <Text style={styles.deleteActionText}>Delete</Text>
+          </TouchableOpacity>
+        )}
+        overshootRight={false}
       >
-        <View style={[styles.iconWrap, { backgroundColor: icon.color + '18' }]}>
-          <Ionicons name={icon.name} size={22} color={icon.color} />
-        </View>
-        <View style={styles.textWrap}>
-          <Text style={[styles.title, !item.is_read && styles.titleUnread]}>{item.title}</Text>
-          <Text style={styles.body}>{item.body}</Text>
-          <Text style={styles.time}>{timeAgo(item.created_at)}</Text>
-        </View>
-        {!item.is_read && <View style={styles.dot} />}
-      </TouchableOpacity>
+        <TouchableOpacity
+          style={[styles.row, !item.is_read && styles.rowUnread]}
+          onPress={() => handleTap(item)}
+          activeOpacity={0.7}
+        >
+          <View style={[styles.iconWrap, { backgroundColor: icon.color + '18' }]}>
+            <Ionicons name={icon.name} size={22} color={icon.color} />
+          </View>
+          <View style={styles.textWrap}>
+            <Text style={[styles.title, !item.is_read && styles.titleUnread]}>{item.title}</Text>
+            <Text style={styles.body}>{item.body}</Text>
+            <Text style={styles.time}>{timeAgo(item.created_at)}</Text>
+          </View>
+          {!item.is_read && <View style={styles.dot} />}
+        </TouchableOpacity>
+      </Swipeable>
     );
   };
 
@@ -230,4 +251,16 @@ const styles = StyleSheet.create({
   },
   center: { flex: 1, alignItems: 'center', justifyContent: 'center', paddingVertical: 60 },
   emptyText: { fontSize: 16, color: '#aaa', marginTop: 12 },
+  deleteAction: {
+    backgroundColor: '#ff3b30',
+    justifyContent: 'center',
+    alignItems: 'center',
+    width: 80,
+  },
+  deleteActionText: {
+    color: '#fff',
+    fontSize: 12,
+    fontWeight: '600',
+    marginTop: 4,
+  },
 });

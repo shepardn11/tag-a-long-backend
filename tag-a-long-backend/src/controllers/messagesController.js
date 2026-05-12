@@ -303,6 +303,13 @@ const sendMessage = async (req, res, next) => {
       });
     }
 
+    if (content.startsWith(ACTIVITY_SHARE_PREFIX) && content.length > 5000) {
+      return res.status(400).json({
+        success: false,
+        error: { code: 'MESSAGE_TOO_LONG', message: 'Activity share payload too large' },
+      });
+    }
+
     if (!content.startsWith(ACTIVITY_SHARE_PREFIX) && content.length > 500) {
       return res.status(400).json({
         success: false,

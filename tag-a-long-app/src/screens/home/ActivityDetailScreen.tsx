@@ -94,7 +94,7 @@ export default function ActivityDetailScreen({ navigation, route }: Props) {
       const data = await listingAPI.getById(activityId);
       setListing(data);
 
-      // Mark all notifications for this listing as read and refresh badges
+      // Mark notifications read for this listing, then refresh both badges
       notificationAPI.markReadForListing(activityId).then(() => refreshTabCounts()).catch(() => {});
 
       // If it's own activity, fetch requests

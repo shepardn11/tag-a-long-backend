@@ -74,10 +74,6 @@ const getFeed = async (req, res, next) => {
 
     // Filter by date expiry and optional radius
     const now = new Date();
-    if (min_age || max_age) {
-      console.log('[Age filter] min_age:', min_age, 'max_age:', max_age, 'listings count:', listings.length);
-      listings.forEach(l => console.log('  user dob:', l.user.date_of_birth, 'username:', l.user.username));
-    }
     const formattedListings = listings
       .filter(listing => {
         // Radius filter using creator's GPS coords (accurate, no geocoding)

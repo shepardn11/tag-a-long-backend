@@ -8,8 +8,8 @@ const upload = require('../config/multer');
 const router = express.Router();
 
 // Specific routes MUST come before the catch-all /:username route
-router.get('/search-users', profileController.searchUsers);
-router.get('/by-id/:id', profileController.getProfileById);
+router.get('/search-users', authenticateToken, profileController.searchUsers);
+router.get('/by-id/:id', authenticateToken, profileController.getProfileById);
 router.get('/me', authenticateToken, profileController.getMyProfile);
 
 // PUT and POST routes
@@ -19,6 +19,6 @@ router.post('/gallery', authenticateToken, profileController.addGalleryPhoto);
 router.delete('/gallery', authenticateToken, profileController.removeGalleryPhoto);
 
 // IMPORTANT: Catch-all username route MUST be last
-router.get('/:username', profileController.getProfileByUsername);
+router.get('/:username', authenticateToken, profileController.getProfileByUsername);
 
 module.exports = router;

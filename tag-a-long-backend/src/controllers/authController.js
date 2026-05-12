@@ -248,6 +248,10 @@ const deleteAccount = async (req, res, next) => {
       select: { password_hash: true },
     });
 
+    if (!user) {
+      return res.status(401).json({ success: false, error: { code: 'INVALID_PASSWORD', message: 'Incorrect password' } });
+    }
+
     const isValid = await bcrypt.compare(password, user.password_hash);
     if (!isValid) {
       return res.status(401).json({ success: false, error: { code: 'INVALID_PASSWORD', message: 'Incorrect password' } });

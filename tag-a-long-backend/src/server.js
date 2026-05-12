@@ -28,14 +28,17 @@ initializeFirebase();
 
 // Middleware
 app.use(helmet());
+const allowedOrigins = process.env.CORS_ORIGIN?.split(',') ?? [];
 app.use(cors({
-  origin: process.env.CORS_ORIGIN?.split(',') || '*',
+  origin: allowedOrigins.length > 0 ? allowedOrigins : false,
   credentials: true,
 }));
 
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
-app.use(morgan('dev'));
+app.use(express.json({ limit: '50kb' }));
+app.use(express.urlencoded({ extended: true, limit: '50kb' }));
+if (process.env.NODE_ENV !== 'production') {
+  app.use(morgan('dev'));
+}
 
 // Rate limiting
 app.use('/api', apiLimiter);

@@ -251,10 +251,6 @@ export default function ProfileSetupScreen({ navigation }: Props) {
     setIsLoading(false);
   };
 
-  const handleSkip = () => {
-    completeSetup();
-  };
-
   return (
     <KeyboardAvoidingView
       style={styles.container}
@@ -540,14 +536,5 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontSize: 16,
     fontWeight: '600',
-  },
-  skipButton: {
-    padding: 16,
-    alignItems: 'center',
-    marginTop: 5,
-  },
-  skipButtonText: {
-    color: '#666',
-    fontSize: 14,
   },
 });

@@ -209,6 +209,11 @@ export default function FeedScreen({ navigation }: Props) {
   }, []);
 
   const fetchListings = useCallback(async () => {
+    // Always restore the header when fetching new data so it isn't stuck hidden
+    if (!isHeaderVisible.current) {
+      isHeaderVisible.current = true;
+      headerHeight.setValue(HEADER_HEIGHT);
+    }
     try {
       setError(null);
       const options = {

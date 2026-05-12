@@ -507,12 +507,19 @@ export default function ActivityDetailScreen({ navigation, route }: Props) {
             </View>
           )}
 
-          {/* Tagged Users Section - Who's joining */}
-          {listing.tagged_users && listing.tagged_users.length > 0 && (
+          {/* Who's joining - tagged users + accepted requesters */}
+          {(() => {
+            const tagged = listing.tagged_users || [];
+            const accepted = (listing as any).accepted_participants || [];
+            const all = [...tagged, ...accepted].filter(
+              (p, i, arr) => arr.findIndex(u => u.id === p.id) === i
+            );
+            if (all.length === 0) return null;
+            return (
             <View style={styles.participantsSection}>
-              <Text style={styles.sectionTitle}>Who's joining ({listing.tagged_users.length})</Text>
+              <Text style={styles.sectionTitle}>Who's joining ({all.length})</Text>
               <View style={styles.participantsList}>
-                {listing.tagged_users.map((participant) => (
+                {all.map((participant) => (
                   <TouchableOpacity
                     key={participant.id}
                     style={styles.participantCard}
@@ -539,7 +546,8 @@ export default function ActivityDetailScreen({ navigation, route }: Props) {
                 ))}
               </View>
             </View>
-          )}
+            );
+          })()}
           {/* Delete Activity - Only for owner */}
           {isOwnActivity && (
             <TouchableOpacity style={styles.deleteButton} onPress={handleDeleteActivity}>

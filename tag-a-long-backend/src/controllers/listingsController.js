@@ -193,6 +193,22 @@ const getListingById = async (req, res, next) => {
       });
     }
 
+    // Fetch accepted participants
+    const acceptedRequests = await prisma.request.findMany({
+      where: { listing_id: id, status: 'accepted' },
+      include: {
+        requester: {
+          select: {
+            id: true,
+            username: true,
+            display_name: true,
+            profile_photo_url: true,
+          },
+        },
+      },
+    });
+    const acceptedParticipants = acceptedRequests.map(r => r.requester);
+
     // Format response
     const formattedListing = {
       id: listing.id,
@@ -216,6 +232,7 @@ const getListingById = async (req, res, next) => {
       has_requested: listing.requests.length > 0,
       request_status: listing.requests.length > 0 ? listing.requests[0].status : null,
       tagged_users: taggedUsers,
+      accepted_participants: acceptedParticipants,
     };
 
     res.json({

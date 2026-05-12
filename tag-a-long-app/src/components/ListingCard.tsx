@@ -26,7 +26,6 @@ export default function ListingCard({ listing, onPress, pendingRequestCount }: L
     return date.toLocaleDateString('en-US', {
       month: 'short',
       day: 'numeric',
-      year: 'numeric'
     });
   };
 

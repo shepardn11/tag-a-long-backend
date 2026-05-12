@@ -146,7 +146,7 @@ export default function ListingCard({ listing, onPress, pendingRequestCount }: L
 
         <View style={styles.infoGrid}>
           <View style={styles.infoItem}>
-            <Ionicons name="calendar" size={16} color="#fff" />
+            <Ionicons name="calendar" size={18} color="#fff" />
             <Text style={styles.infoText} numberOfLines={1}>
               {formatDate(listing.date)}
             </Text>
@@ -154,7 +154,7 @@ export default function ListingCard({ listing, onPress, pendingRequestCount }: L
 
           {listing.time && (
             <View style={styles.infoItem}>
-              <Ionicons name="time" size={16} color="#fff" />
+              <Ionicons name="time" size={18} color="#fff" />
               <Text style={styles.infoText} numberOfLines={1}>
                 {formatTime(listing.time)}
               </Text>
@@ -162,7 +162,7 @@ export default function ListingCard({ listing, onPress, pendingRequestCount }: L
           )}
 
           <View style={[styles.infoItem, styles.infoItemFull]}>
-            <Ionicons name="location" size={16} color="#fff" />
+            <Ionicons name="location" size={18} color="#fff" />
             <Text style={styles.infoText} numberOfLines={1}>
               {listing.location}
             </Text>
@@ -242,7 +242,7 @@ const styles = StyleSheet.create({
     zIndex: 2,
   },
   title: {
-    fontSize: 20,
+    fontSize: 26,
     fontWeight: 'bold',
     color: '#fff',
   },
@@ -250,31 +250,31 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     flexWrap: 'wrap',
     marginBottom: 4,
-    gap: 4,
+    gap: 6,
   },
   infoItem: {
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: 'rgba(0, 0, 0, 0.45)',
-    paddingHorizontal: 8,
-    paddingVertical: 3,
-    borderRadius: 10,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 12,
   },
   titleBubble: {
     alignSelf: 'flex-start',
-    marginBottom: 6,
-    paddingVertical: 5,
-    paddingHorizontal: 10,
+    marginBottom: 8,
+    paddingVertical: 8,
+    paddingHorizontal: 14,
   },
   infoItemFull: {
     flex: 1,
     minWidth: '100%',
   },
   infoText: {
-    fontSize: 12,
+    fontSize: 15,
     fontWeight: '600',
     color: '#fff',
-    marginLeft: 4,
+    marginLeft: 6,
   },
   userName: {
     fontSize: 12,

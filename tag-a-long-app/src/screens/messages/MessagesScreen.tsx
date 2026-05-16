@@ -85,6 +85,7 @@ export default function MessagesScreen({ navigation }: any) {
 
   const formatLastMessage = (content: string) => {
     if (content.startsWith('[activity_share]')) return '🗓 Shared an activity';
+    if (content.startsWith('You have been accepted to tag along')) return '🎉 You\'ve been accepted!';
     return content;
   };
 

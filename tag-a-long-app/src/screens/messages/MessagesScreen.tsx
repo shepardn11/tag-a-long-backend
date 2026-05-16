@@ -42,7 +42,12 @@ export default function MessagesScreen({ navigation }: any) {
   const fetchConversations = async () => {
     try {
       const data = await messageAPI.getConversations();
-      setConversations(data);
+      const sorted = [...data].sort((a, b) => {
+        const aTime = a.last_message?.created_at ?? a.updated_at;
+        const bTime = b.last_message?.created_at ?? b.updated_at;
+        return new Date(bTime).getTime() - new Date(aTime).getTime();
+      });
+      setConversations(sorted);
     } catch (error) {
       console.error('Error fetching conversations:', error);
     } finally {

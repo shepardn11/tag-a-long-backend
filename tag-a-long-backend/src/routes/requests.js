@@ -9,5 +9,6 @@ router.get('/received', authenticateToken, requestsController.getReceivedRequest
 router.get('/sent', authenticateToken, requestsController.getSentRequests);
 router.put('/:id/accept', authenticateToken, requestsController.acceptRequest);
 router.put('/:id/reject', authenticateToken, requestsController.rejectRequest);
+router.put('/:id/remove', authenticateToken, requestsController.removeParticipant);
 
 module.exports = router;

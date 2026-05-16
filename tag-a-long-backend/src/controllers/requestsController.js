@@ -491,10 +491,52 @@ const rejectRequest = async (req, res, next) => {
   }
 };
 
+const removeParticipant = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+
+    const request = await prisma.tagAlongRequest.findUnique({
+      where: { id },
+      include: { listing: true },
+    });
+
+    if (!request) {
+      return res.status(404).json({
+        success: false,
+        error: { code: 'NOT_FOUND', message: 'Request not found' },
+      });
+    }
+
+    if (request.listing.user_id !== req.user.id) {
+      return res.status(403).json({
+        success: false,
+        error: { code: 'FORBIDDEN', message: 'Not your listing' },
+      });
+    }
+
+    if (request.status !== 'accepted') {
+      return res.status(400).json({
+        success: false,
+        error: { code: 'NOT_ACCEPTED', message: 'Participant is not currently accepted' },
+      });
+    }
+
+    const updatedRequest = await prisma.tagAlongRequest.update({
+      where: { id },
+      data: { status: 'rejected', responded_at: new Date() },
+    });
+
+    res.json({ success: true, data: updatedRequest });
+  } catch (error) {
+    next(error);
+  }
+};
+
 module.exports = {
   createRequest,
   getReceivedRequests,
   getSentRequests,
   acceptRequest,
   rejectRequest,
+  removeParticipant,
 };

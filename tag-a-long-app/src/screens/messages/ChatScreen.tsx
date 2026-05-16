@@ -21,6 +21,7 @@ import { useAuthStore } from '../../store/authStore';
 import { refreshTabCounts } from '../../utils/tabRefresh';
 
 const ACTIVITY_SHARE_PREFIX = '[activity_share]';
+const ACTIVITY_ACCEPT_PREFIX = '[activity_accept]';
 
 interface Message {
   id: string;
@@ -177,9 +178,10 @@ export default function ChatScreen({ route, navigation }: any) {
     return `${hr % 12 || 12}:${m} ${hr >= 12 ? 'PM' : 'AM'}`;
   };
 
-  const renderActivityCard = (item: Message, isMyMessage: boolean) => {
+  const renderActivityCard = (item: Message, isMyMessage: boolean, isAcceptance = false) => {
     try {
-      const activity = JSON.parse(item.content.slice(ACTIVITY_SHARE_PREFIX.length));
+      const prefix = isAcceptance ? ACTIVITY_ACCEPT_PREFIX : ACTIVITY_SHARE_PREFIX;
+      const activity = JSON.parse(item.content.slice(prefix.length));
       return (
         <TouchableOpacity
           style={[styles.activityCard, isMyMessage ? styles.myActivityCard : styles.otherActivityCard]}
@@ -199,6 +201,9 @@ export default function ChatScreen({ route, navigation }: any) {
             </View>
           )}
           <View style={styles.activityCardBody}>
+            {isAcceptance && (
+              <Text style={styles.acceptanceBadge}>🎉 You've been accepted!</Text>
+            )}
             <Text style={styles.activityCardTitle} numberOfLines={2}>{activity.title}</Text>
             <Text style={styles.activityCardMeta}>
               📅 {formatActivityDate(activity.date)}{activity.time ? '  ·  ' + formatActivityTime(activity.time) : ''}
@@ -222,6 +227,7 @@ export default function ChatScreen({ route, navigation }: any) {
       index === messages.length - 1 ||
       messages[index + 1]?.sender_id !== item.sender_id;
     const isActivityShare = item.content.startsWith(ACTIVITY_SHARE_PREFIX);
+    const isActivityAccept = item.content.startsWith(ACTIVITY_ACCEPT_PREFIX);
 
     return (
       <View
@@ -248,6 +254,8 @@ export default function ChatScreen({ route, navigation }: any) {
 
         {isActivityShare ? (
           renderActivityCard(item, isMyMessage)
+        ) : isActivityAccept ? (
+          renderActivityCard(item, isMyMessage, true)
         ) : (
           <View
             style={[
@@ -519,6 +527,12 @@ const styles = StyleSheet.create({
   activityCardBody: {
     padding: 10,
     gap: 3,
+  },
+  acceptanceBadge: {
+    fontSize: 13,
+    fontWeight: '700',
+    color: '#E8572A',
+    marginBottom: 6,
   },
   activityCardTitle: {
     fontSize: 14,

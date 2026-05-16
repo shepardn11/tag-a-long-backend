@@ -334,17 +334,8 @@ const acceptRequest = async (req, res, next) => {
       });
     }
 
-    // Send automated acceptance message in the conversation
-    await prisma.message.create({
-      data: {
-        conversation_id: conversation.id,
-        sender_id: request.listing.user_id,
-        content: `You have been accepted to tag along to "${request.listing.title || 'this activity'}"! Feel free to message with any questions.`,
-      },
-    });
-
-    // Send the activity card so the accepted user can view details
-    const activitySharePayload = JSON.stringify({
+    // Send a single acceptance card combining the notification and activity details
+    const activityAcceptPayload = JSON.stringify({
       id: request.listing.id,
       title: request.listing.title,
       date: request.listing.date,
@@ -358,7 +349,7 @@ const acceptRequest = async (req, res, next) => {
       data: {
         conversation_id: conversation.id,
         sender_id: request.listing.user_id,
-        content: `[activity_share]${activitySharePayload}`,
+        content: `[activity_accept]${activityAcceptPayload}`,
       },
     });
 

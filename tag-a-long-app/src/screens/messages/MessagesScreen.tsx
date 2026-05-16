@@ -83,6 +83,11 @@ export default function MessagesScreen({ navigation }: any) {
     return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
   };
 
+  const formatLastMessage = (content: string) => {
+    if (content.startsWith('[activity_share]')) return '🗓 Shared an activity';
+    return content;
+  };
+
   const renderConversation = ({ item }: { item: Conversation }) => (
     <TouchableOpacity
       style={styles.conversationItem}
@@ -125,7 +130,7 @@ export default function MessagesScreen({ navigation }: any) {
               ]}
               numberOfLines={1}
             >
-              {item.last_message.content}
+              {formatLastMessage(item.last_message.content)}
             </Text>
             {item.unread_count > 0 && (
               <View style={styles.unreadBadge}>

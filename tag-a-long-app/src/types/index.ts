@@ -126,7 +126,6 @@ export type HomeStackParamList = {
   ActivityDetail: { activityId: string };
   CreateActivity: undefined;
   UserProfile: { userId: string };
-  Notifications: undefined;
 };
 
 export type SearchStackParamList = {

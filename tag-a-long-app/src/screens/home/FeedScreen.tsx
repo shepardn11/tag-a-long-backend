@@ -27,10 +27,9 @@ import * as Location from 'expo-location';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { HomeStackParamList, ActivityListing } from '../../types';
 import { Ionicons } from '@expo/vector-icons';
-import { listingAPI, notificationAPI } from '../../api/endpoints';
+import { listingAPI } from '../../api/endpoints';
 import ListingCard from '../../components/ListingCard';
 import { useAuthStore } from '../../store/authStore';
-import { registerBellRefresh } from '../../utils/tabRefresh';
 import DateTimePicker from '@react-native-community/datetimepicker';
 
 const HEADER_HEIGHT = 72;
@@ -104,7 +103,6 @@ export default function FeedScreen({ navigation }: Props) {
   const [error, setError] = useState<string | null>(null);
   const [radius, setRadius] = useState(50);
   const [userCoords, setUserCoords] = useState<{ lat: number; lng: number } | null>(null);
-  const [unreadNotifications, setUnreadNotifications] = useState(0);
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [minAge, setMinAge] = useState<number | null>(null);
   const [maxAge, setMaxAge] = useState<number | null>(null);
@@ -290,19 +288,10 @@ export default function FeedScreen({ navigation }: Props) {
     }
   }, [filterVisible]);
 
-  const refreshBell = useCallback(() => {
-    notificationAPI.getUnreadCount().then(setUnreadNotifications).catch(() => {});
-  }, []);
-
-  useEffect(() => {
-    registerBellRefresh(refreshBell);
-  }, [refreshBell]);
-
   useFocusEffect(
     useCallback(() => {
       fetchListings();
-      refreshBell();
-    }, [fetchListings, refreshBell])
+    }, [fetchListings])
   );
 
   const handleRefresh = useCallback(() => {
@@ -368,16 +357,6 @@ export default function FeedScreen({ navigation }: Props) {
         </View>
         <Text style={styles.headerTitle}>Tag A Long</Text>
         <View style={styles.headerRight}>
-          <TouchableOpacity style={styles.headerIcon} onPress={() => navigation.navigate('Notifications')} accessibilityLabel={unreadNotifications > 0 ? `Notifications, ${unreadNotifications} unread` : 'Notifications'}>
-            <Ionicons name="notifications-outline" size={26} color="#333" />
-            {unreadNotifications > 0 && (
-              <View style={styles.notifBadge}>
-                <Text style={styles.notifBadgeText}>
-                  {unreadNotifications > 9 ? '9+' : unreadNotifications}
-                </Text>
-              </View>
-            )}
-          </TouchableOpacity>
           <TouchableOpacity style={styles.createButton} onPress={() => navigation.navigate('CreateActivity')} accessibilityLabel="Create new activity">
             <Ionicons name="add-circle-sharp" size={28} color="#E8572A" />
           </TouchableOpacity>

@@ -334,6 +334,25 @@ const acceptRequest = async (req, res, next) => {
       },
     });
 
+    // Send the activity card so the accepted user can view details
+    const activitySharePayload = JSON.stringify({
+      id: request.listing.id,
+      title: request.listing.title,
+      date: request.listing.date,
+      time: request.listing.time,
+      location: request.listing.location,
+      photo_url: request.listing.photo_url || null,
+      description: request.listing.description,
+      display_name: request.listing.user.display_name || request.listing.user.username,
+    });
+    await prisma.message.create({
+      data: {
+        conversation_id: conversation.id,
+        sender_id: request.listing.user_id,
+        content: `[activity_share]${activitySharePayload}`,
+      },
+    });
+
     // Create in-app notification
     const notification = await prisma.notification.create({
       data: {

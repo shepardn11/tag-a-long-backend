@@ -31,9 +31,16 @@ const getFeed = async (req, res, next) => {
       dateFilter.lte = new Date(date_to);
     }
 
+    // Exclude blocked users in both directions
+    const blocks = await prisma.block.findMany({
+      where: { OR: [{ blocker_id: req.user.id }, { blocked_id: req.user.id }] },
+      select: { blocker_id: true, blocked_id: true },
+    });
+    const blockedIds = blocks.map(b => b.blocker_id === req.user.id ? b.blocked_id : b.blocker_id);
+
     const where = {
       is_active: true,
-      user_id: { not: req.user.id },
+      user_id: { not: req.user.id, ...(blockedIds.length > 0 ? { notIn: blockedIds } : {}) },
       date: dateFilter,
     };
 

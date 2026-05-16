@@ -33,6 +33,23 @@ const createRequest = async (req, res, next) => {
       });
     }
 
+    // Check if either user has blocked the other
+    const blockExists = await prisma.block.findFirst({
+      where: {
+        OR: [
+          { blocker_id: requester_id, blocked_id: listing.user_id },
+          { blocker_id: listing.user_id, blocked_id: requester_id },
+        ],
+      },
+    });
+
+    if (blockExists) {
+      return res.status(403).json({
+        success: false,
+        error: { code: 'BLOCKED', message: 'You cannot request to join this activity' },
+      });
+    }
+
     // Check if request already exists
     const existingRequest = await prisma.tagAlongRequest.findUnique({
       where: {

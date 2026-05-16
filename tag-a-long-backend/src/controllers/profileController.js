@@ -14,7 +14,6 @@ const getMyProfile = async (req, res, next) => {
         city: true,
         profile_photo_url: true,
         photo_gallery: true,
-        instagram_handle: true,
         created_at: true,
       },
     });
@@ -42,7 +41,6 @@ const getProfileById = async (req, res, next) => {
         city: true,
         profile_photo_url: true,
         photo_gallery: true,
-        instagram_handle: true,
         created_at: true,
       },
     });
@@ -79,7 +77,6 @@ const getProfileByUsername = async (req, res, next) => {
         city: true,
         profile_photo_url: true,
         photo_gallery: true,
-        instagram_handle: true,
         created_at: true,
       },
     });
@@ -115,13 +112,12 @@ const getProfileByUsername = async (req, res, next) => {
 
 const updateProfile = async (req, res, next) => {
   try {
-    const { display_name, bio, city, instagram_handle } = req.body;
+    const { display_name, bio, city } = req.body;
 
     const updateData = {};
     if (display_name !== undefined) updateData.display_name = display_name;
     if (bio !== undefined) updateData.bio = bio;
     if (city !== undefined) updateData.city = city;
-    if (instagram_handle !== undefined) updateData.instagram_handle = instagram_handle;
 
     const user = await prisma.user.update({
       where: { id: req.user.id },
@@ -135,7 +131,6 @@ const updateProfile = async (req, res, next) => {
         city: true,
         profile_photo_url: true,
         photo_gallery: true,
-        instagram_handle: true,
         created_at: true,
       },
     });
@@ -191,7 +186,6 @@ const searchUsers = async (req, res, next) => {
         city: true,
         profile_photo_url: true,
         photo_gallery: true,
-        instagram_handle: true,
         created_at: true,
       },
       take: 20, // Limit results to 20
@@ -252,7 +246,6 @@ const uploadProfilePhoto = async (req, res, next) => {
         city: true,
         profile_photo_url: true,
         photo_gallery: true,
-        instagram_handle: true,
         created_at: true,
       },
     });
@@ -314,7 +307,6 @@ const addGalleryPhoto = async (req, res, next) => {
         city: true,
         profile_photo_url: true,
         photo_gallery: true,
-        instagram_handle: true,
         created_at: true,
       },
     });
@@ -364,7 +356,6 @@ const removeGalleryPhoto = async (req, res, next) => {
         city: true,
         profile_photo_url: true,
         photo_gallery: true,
-        instagram_handle: true,
         created_at: true,
       },
     });

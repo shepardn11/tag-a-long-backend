@@ -37,7 +37,7 @@ const sendPhoneOtp = async (req, res, next) => {
 
 const signup = async (req, res, next) => {
   try {
-    const { email, password, display_name, username, bio, date_of_birth, city, instagram_handle, otp_code } = req.body;
+    const { email, password, display_name, username, bio, date_of_birth, city, otp_code } = req.body;
     const phone = '+' + (req.body.phone || '').replace(/\D/g, '');
 
     // Verify phone OTP via Twilio Verify
@@ -59,7 +59,6 @@ const signup = async (req, res, next) => {
         bio: bio || null,
         date_of_birth: new Date(date_of_birth),
         city,
-        instagram_handle: instagram_handle || null,
         phone,
         phone_verified: true,
       },
@@ -106,7 +105,6 @@ const login = async (req, res, next) => {
         bio: true,
         city: true,
         profile_photo_url: true,
-        instagram_handle: true,
         is_active: true,
         token_version: true,
       },

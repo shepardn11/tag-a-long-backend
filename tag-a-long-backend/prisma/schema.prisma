@@ -20,7 +20,6 @@ model User {
   profile_photo_url String?
   photo_gallery     String[]            @default([])
   city              String
-  instagram_handle  String?
   date_of_birth     DateTime
   is_active         Boolean             @default(true)
   phone_verified    Boolean             @default(false)
@@ -87,6 +86,8 @@ model Listing {
   @@index([user_id, created_at])
   @@index([expires_at])
   @@index([category])
+  @@index([is_active, date])
+  @@index([latitude, longitude])
   @@map("listings")
 }
 

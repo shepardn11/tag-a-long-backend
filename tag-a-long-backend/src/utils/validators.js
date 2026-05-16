@@ -23,7 +23,6 @@ const signupSchema = Joi.object({
       'date.max': 'You must be at least 18 years old',
     }),
   city: Joi.string().min(2).max(100).required(),
-  instagram_handle: Joi.string().max(50).allow(''),
   phone: Joi.string().pattern(/^\+[1-9]\d{1,14}$/).required().messages({
     'string.pattern.base': 'Phone must be in E.164 format (e.g. +14155551234)',
   }),
@@ -72,7 +71,6 @@ const updateProfileSchema = Joi.object({
   display_name: Joi.string().min(2).max(100),
   bio: Joi.string().max(150).allow(''),
   city: Joi.string().min(2).max(100),
-  instagram_handle: Joi.string().max(50).allow(''),
 });
 
 module.exports = {

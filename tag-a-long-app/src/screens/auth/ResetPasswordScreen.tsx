@@ -19,6 +19,20 @@ export default function ResetPasswordScreen({ navigation, route }: Props) {
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [isResending, setIsResending] = useState(false);
+
+  const handleResend = async () => {
+    try {
+      setIsResending(true);
+      await apiClient.getInstance().post('/auth/forgot-password', { email });
+      Alert.alert('Code Sent', `A new code has been sent to ${email}.`);
+    } catch (err: any) {
+      const msg = err.response?.data?.error?.message || 'Could not resend code. Please try again.';
+      Alert.alert('Error', msg);
+    } finally {
+      setIsResending(false);
+    }
+  };
 
   const handleReset = async () => {
     if (!otp.trim() || !newPassword || !confirmPassword) {
@@ -31,6 +45,10 @@ export default function ResetPasswordScreen({ navigation, route }: Props) {
     }
     if (newPassword.length < 8) {
       Alert.alert('Error', 'Password must be at least 8 characters.');
+      return;
+    }
+    if (!/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/.test(newPassword)) {
+      Alert.alert('Error', 'Password must contain uppercase, lowercase, and a number.');
       return;
     }
     try {
@@ -90,6 +108,13 @@ export default function ResetPasswordScreen({ navigation, route }: Props) {
         <TouchableOpacity style={[styles.button, isLoading && styles.buttonDisabled]} onPress={handleReset} disabled={isLoading}>
           {isLoading ? <ActivityIndicator color="#fff" /> : <Text style={styles.buttonText}>Reset Password</Text>}
         </TouchableOpacity>
+
+        <TouchableOpacity style={styles.resend} onPress={handleResend} disabled={isResending || isLoading}>
+          {isResending
+            ? <ActivityIndicator color="#E8572A" size="small" />
+            : <Text style={styles.resendText}>Didn't get a code? <Text style={styles.resendLink}>Resend</Text></Text>
+          }
+        </TouchableOpacity>
       </KeyboardAvoidingView>
     </SafeAreaView>
   );
@@ -111,4 +136,7 @@ const styles = StyleSheet.create({
   },
   buttonDisabled: { opacity: 0.6 },
   buttonText: { color: '#fff', fontSize: 16, fontWeight: '600' },
+  resend: { marginTop: 20, alignItems: 'center' },
+  resendText: { fontSize: 14, color: '#666' },
+  resendLink: { color: '#E8572A', fontWeight: '600' },
 });

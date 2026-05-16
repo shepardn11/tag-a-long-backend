@@ -37,7 +37,6 @@ interface Props {
 export default function ProfileSetupScreen({ navigation }: Props) {
   const { user, updateUser, setIsAuthenticated, setProfileSetupComplete } = useAuthStore();
   const [bio, setBio] = useState('');
-  const [instagramHandle, setInstagramHandle] = useState('');
   const [profilePhoto, setProfilePhoto] = useState<string | null>(null);
   const [galleryPhotos, setGalleryPhotos] = useState<(string | null)[]>([null, null, null, null, null, null]);
   const [isLoading, setIsLoading] = useState(false);
@@ -106,8 +105,12 @@ export default function ProfileSetupScreen({ navigation }: Props) {
     }
   };
 
-  const handleRemovePhoto = () => {
+  const handleRemovePhoto = async () => {
     setProfilePhoto(null);
+    try {
+      await profileAPI.deletePhoto();
+      updateUser({ profile_photo_url: undefined });
+    } catch {}
   };
 
   const handleAddGalleryPhoto = async (index: number) => {
@@ -212,17 +215,11 @@ export default function ProfileSetupScreen({ navigation }: Props) {
     try {
       setIsLoading(true);
 
-      // Update profile with bio and instagram if provided
       const updates: any = {};
 
       if (bio.trim()) {
         updates.bio = bio.trim();
       }
-
-      if (instagramHandle.trim()) {
-        updates.instagram_handle = instagramHandle.trim();
-      }
-
 
       // Only update if there's something to update
       if (Object.keys(updates).length > 0) {
@@ -287,6 +284,7 @@ export default function ProfileSetupScreen({ navigation }: Props) {
                         <Image
                           source={{ uri: profilePhoto }}
                           style={styles.largePhotoImage}
+                          contentFit="cover"
                         />
                         <TouchableOpacity
                           style={styles.removePhotoButton}
@@ -328,6 +326,7 @@ export default function ProfileSetupScreen({ navigation }: Props) {
                         <Image
                           source={{ uri: photo }}
                           style={styles.galleryPhotoImage}
+                          contentFit="cover"
                         />
                         <TouchableOpacity
                           style={styles.removeGalleryPhotoButton}
@@ -437,7 +436,6 @@ const styles = StyleSheet.create({
   largePhotoImage: {
     width: '100%',
     height: '100%',
-    resizeMode: 'contain',
   },
   photoPlaceholder: {
     width: '100%',
@@ -479,7 +477,6 @@ const styles = StyleSheet.create({
   galleryPhotoImage: {
     width: '100%',
     height: '100%',
-    resizeMode: 'contain',
   },
   galleryPhotoPlaceholder: {
     width: '100%',

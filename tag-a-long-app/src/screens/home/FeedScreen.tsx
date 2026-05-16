@@ -19,6 +19,7 @@ import {
   Animated,
   Easing,
   PanResponder,
+  Linking,
 } from 'react-native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useFocusEffect } from '@react-navigation/native';
@@ -187,25 +188,32 @@ export default function FeedScreen({ navigation }: Props) {
       return;
     }
 
-    Alert.alert(
-      'Location Required',
-      'Tag A Long needs your location to show you activities happening nearby.',
-      [
-        {
-          text: 'Enable Location',
-          onPress: async () => {
-            const { status } = await Location.requestForegroundPermissionsAsync();
-            if (status === 'granted') {
-              const loc = await Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.Balanced });
-              setUserCoords({ lat: loc.coords.latitude, lng: loc.coords.longitude });
-            } else {
-              requestLocation();
-            }
-          },
-        },
-      ],
-      { cancelable: false }
-    );
+    if (existing === 'denied') {
+      Alert.alert(
+        'Location Permission Denied',
+        'Enable location in Settings to find activities near you, or browse by city.',
+        [
+          { text: 'Not Now', style: 'cancel' },
+          { text: 'Open Settings', onPress: () => Linking.openSettings() },
+        ]
+      );
+      return;
+    }
+
+    const { status } = await Location.requestForegroundPermissionsAsync();
+    if (status === 'granted') {
+      const loc = await Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.Balanced });
+      setUserCoords({ lat: loc.coords.latitude, lng: loc.coords.longitude });
+    } else {
+      Alert.alert(
+        'Location Permission Denied',
+        'Enable location in Settings to find activities near you, or browse by city.',
+        [
+          { text: 'Not Now', style: 'cancel' },
+          { text: 'Open Settings', onPress: () => Linking.openSettings() },
+        ]
+      );
+    }
   };
 
   const loadSavedRadius = async () => {
@@ -353,14 +361,14 @@ export default function FeedScreen({ navigation }: Props) {
     <Animated.View style={{ height: headerHeight, overflow: 'hidden' }}>
       <View style={styles.header}>
         <View style={styles.headerLeft}>
-          <TouchableOpacity style={styles.headerIcon} onPress={openFilter}>
+          <TouchableOpacity style={styles.headerIcon} onPress={openFilter} accessibilityLabel="Filter activities">
             <Ionicons name="options-outline" size={26} color="#333" />
             {filtersActive && <View style={styles.filterDot} />}
           </TouchableOpacity>
         </View>
         <Text style={styles.headerTitle}>Tag A Long</Text>
         <View style={styles.headerRight}>
-          <TouchableOpacity style={styles.headerIcon} onPress={() => navigation.navigate('Notifications')}>
+          <TouchableOpacity style={styles.headerIcon} onPress={() => navigation.navigate('Notifications')} accessibilityLabel={unreadNotifications > 0 ? `Notifications, ${unreadNotifications} unread` : 'Notifications'}>
             <Ionicons name="notifications-outline" size={26} color="#333" />
             {unreadNotifications > 0 && (
               <View style={styles.notifBadge}>
@@ -370,7 +378,7 @@ export default function FeedScreen({ navigation }: Props) {
               </View>
             )}
           </TouchableOpacity>
-          <TouchableOpacity style={styles.createButton} onPress={() => navigation.navigate('CreateActivity')}>
+          <TouchableOpacity style={styles.createButton} onPress={() => navigation.navigate('CreateActivity')} accessibilityLabel="Create new activity">
             <Ionicons name="add-circle-sharp" size={28} color="#E8572A" />
           </TouchableOpacity>
         </View>

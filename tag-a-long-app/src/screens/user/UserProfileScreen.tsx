@@ -181,9 +181,6 @@ export default function UserProfileScreen({ navigation, route }: Props) {
           <View style={styles.profileInfo}>
             <View style={styles.nameRow}>
               <Text style={styles.displayName}>{user.display_name}</Text>
-              {user.is_premium && (
-                <Ionicons name="checkmark-circle" size={18} color="#E8572A" />
-              )}
             </View>
             <Text style={styles.username}>@{user.username}</Text>
             <View style={styles.metaRow}>
@@ -191,12 +188,6 @@ export default function UserProfileScreen({ navigation, route }: Props) {
                 <View style={styles.metaItem}>
                   <Ionicons name="location-outline" size={13} color="#888" />
                   <Text style={styles.metaText}>{user.city}</Text>
-                </View>
-              )}
-              {user.instagram_handle && (
-                <View style={styles.metaItem}>
-                  <Ionicons name="logo-instagram" size={13} color="#888" />
-                  <Text style={styles.metaText}>@{user.instagram_handle}</Text>
                 </View>
               )}
             </View>

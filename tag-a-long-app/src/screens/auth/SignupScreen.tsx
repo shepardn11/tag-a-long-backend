@@ -12,8 +12,10 @@ import {
   Alert,
   ActivityIndicator,
   Linking,
+  Modal,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import DateTimePicker from '@react-native-community/datetimepicker';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { AuthStackParamList } from '../../types';
 import { authAPI } from '../../api/endpoints';
@@ -35,15 +37,20 @@ export default function SignupScreen({ navigation }: Props) {
   const [username, setUsername] = useState('');
   const [city, setCity] = useState('');
   const [dateOfBirth, setDateOfBirth] = useState('');
+  const [dobDate, setDobDate] = useState<Date | null>(null);
+  const [showDobPicker, setShowDobPicker] = useState(false);
   const [phone, setPhone] = useState('');
   const [agreedToTerms, setAgreedToTerms] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+
+  const maxDobDate = new Date();
+  maxDobDate.setFullYear(maxDobDate.getFullYear() - 18);
 
   const PRIVACY_URL = 'https://maddening-sodium-7eb.notion.site/Tag-A-Long-Privacy-Policy-35843955dac980749da8ef205ab7a8d6';
   const TERMS_URL = 'https://maddening-sodium-7eb.notion.site/Tag-A-Long-Terms-of-Service-35843955dac98002853bcc3efa059da6';
 
   const handleSignup = async () => {
-    if (!email || !password || !displayName || !username || !city || !dateOfBirth || !phone) {
+    if (!email || !password || !displayName || !username || !city || !dobDate || !phone) {
       Alert.alert('Error', 'Please fill in all required fields');
       return;
     }
@@ -73,20 +80,8 @@ export default function SignupScreen({ navigation }: Props) {
       Alert.alert('Error', 'Username must be at least 3 characters');
       return;
     }
-
-    const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
-    if (!dateRegex.test(dateOfBirth)) {
-      Alert.alert('Error', 'Date of birth must be in YYYY-MM-DD format');
-      return;
-    }
-
-    const dob = new Date(dateOfBirth);
-    const today = new Date();
-    let age = today.getFullYear() - dob.getFullYear();
-    const m = today.getMonth() - dob.getMonth();
-    if (m < 0 || (m === 0 && today.getDate() < dob.getDate())) age--;
-    if (age < 18) {
-      Alert.alert('Age Requirement', 'You must be at least 18 years old to use Tag-A-Long.');
+    if (!/^[a-z0-9 _]+$/.test(username)) {
+      Alert.alert('Error', 'Username can only contain letters, numbers, spaces, and underscores');
       return;
     }
 
@@ -105,7 +100,7 @@ export default function SignupScreen({ navigation }: Props) {
       setIsLoading(true);
       await authAPI.sendPhoneOtp(phone);
       navigation.navigate('PhoneVerification', {
-        signupData: { email, password, display_name: displayName, username, city, date_of_birth: dateOfBirth, phone },
+        signupData: { email, password, display_name: displayName, username, city, date_of_birth: dobDate!.toISOString().split('T')[0], phone },
       });
     } catch (error: any) {
       const errorMsg = error.response?.data?.error?.message || error.message || 'Could not send verification code';
@@ -175,17 +170,18 @@ export default function SignupScreen({ navigation }: Props) {
               editable={!isLoading}
             />
 
-            <TextInput
-              style={styles.input}
-              placeholder="Date of Birth (YYYY-MM-DD) *"
-              value={dateOfBirth}
-              onChangeText={setDateOfBirth}
-              editable={!isLoading}
-              keyboardType="numbers-and-punctuation"
-            />
-            <View style={styles.requirementsContainer}>
-              <Text style={styles.requirementText}>• Format: YYYY-MM-DD (e.g., 2000-01-15)</Text>
-            </View>
+            <TouchableOpacity
+              style={[styles.input, styles.dobButton]}
+              onPress={() => setShowDobPicker(true)}
+              disabled={isLoading}
+            >
+              <Text style={dobDate ? styles.dobText : styles.dobPlaceholder}>
+                {dobDate
+                  ? dobDate.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })
+                  : 'Date of Birth *'}
+              </Text>
+              <Ionicons name="calendar-outline" size={18} color="#aaa" />
+            </TouchableOpacity>
 
             <TextInput
               style={styles.input}
@@ -278,6 +274,40 @@ export default function SignupScreen({ navigation }: Props) {
           </View>
         </View>
       </ScrollView>
+
+      {/* iOS date picker modal */}
+      {Platform.OS === 'ios' && showDobPicker && (
+        <Modal transparent animationType="slide">
+          <TouchableOpacity style={styles.pickerBackdrop} activeOpacity={1} onPress={() => setShowDobPicker(false)}>
+            <View style={styles.pickerSheet} onStartShouldSetResponder={() => true}>
+              <DateTimePicker
+                value={dobDate || maxDobDate}
+                mode="date"
+                display="spinner"
+                maximumDate={maxDobDate}
+                onChange={(_, date) => { if (date) setDobDate(date); }}
+              />
+              <TouchableOpacity style={styles.pickerDoneButton} onPress={() => setShowDobPicker(false)}>
+                <Text style={styles.pickerDoneText}>Done</Text>
+              </TouchableOpacity>
+            </View>
+          </TouchableOpacity>
+        </Modal>
+      )}
+
+      {/* Android date picker */}
+      {Platform.OS === 'android' && showDobPicker && (
+        <DateTimePicker
+          value={dobDate || maxDobDate}
+          mode="date"
+          display="default"
+          maximumDate={maxDobDate}
+          onChange={(e, date) => {
+            setShowDobPicker(false);
+            if (e.type !== 'dismissed' && date) setDobDate(date);
+          }}
+        />
+      )}
     </KeyboardAvoidingView>
   );
 }
@@ -376,5 +406,41 @@ const styles = StyleSheet.create({
     color: '#E8572A',
     fontSize: 14,
     fontWeight: '600',
+  },
+  dobButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  dobText: {
+    fontSize: 16,
+    color: '#333',
+  },
+  dobPlaceholder: {
+    fontSize: 16,
+    color: '#aaa',
+  },
+  pickerBackdrop: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.4)',
+    justifyContent: 'flex-end',
+  },
+  pickerSheet: {
+    backgroundColor: '#fff',
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    paddingBottom: 40,
+  },
+  pickerDoneButton: {
+    alignItems: 'flex-end',
+    paddingHorizontal: 24,
+    paddingVertical: 12,
+    borderTopWidth: 1,
+    borderTopColor: '#e0e0e0',
+  },
+  pickerDoneText: {
+    fontSize: 17,
+    fontWeight: '600',
+    color: '#E8572A',
   },
 });

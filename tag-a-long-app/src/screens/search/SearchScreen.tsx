@@ -132,7 +132,6 @@ export default function SearchScreen({ navigation }: Props) {
         <View style={styles.userInfo}>
           <View style={styles.nameRow}>
             <Text style={styles.displayName}>{item.display_name}</Text>
-            {item.is_premium && <Ionicons name="checkmark-circle" size={15} color="#E8572A" />}
           </View>
           <Text style={styles.username}>@{item.username}</Text>
           {item.city && (

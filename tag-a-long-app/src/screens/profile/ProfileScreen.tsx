@@ -1,4 +1,4 @@
-// Profile Screen - User profile and settings
+﻿// Profile Screen - User profile and settings
 import React, { useCallback, useState } from 'react';
 import {
   View,
@@ -217,7 +217,7 @@ export default function ProfileScreen() {
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
         <Text style={styles.title}>Profile</Text>
-        <TouchableOpacity style={styles.editIcon} onPress={openEdit}>
+        <TouchableOpacity style={styles.editIcon} onPress={openEdit} accessibilityLabel="Edit profile">
           <Ionicons name="pencil-outline" size={22} color="#E8572A" />
         </TouchableOpacity>
       </View>
@@ -247,12 +247,6 @@ export default function ProfileScreen() {
                     <View style={styles.metaItem}>
                       <Ionicons name="location-outline" size={13} color="#888" />
                       <Text style={styles.metaText}>{user.city}</Text>
-                    </View>
-                  )}
-                  {user.instagram_handle && (
-                    <View style={styles.metaItem}>
-                      <Ionicons name="logo-instagram" size={13} color="#888" />
-                      <Text style={styles.metaText}>@{user.instagram_handle}</Text>
                     </View>
                   )}
                 </View>
@@ -397,7 +391,7 @@ export default function ProfileScreen() {
                 <TouchableOpacity onPress={() => Linking.openURL('https://maddening-sodium-7eb.notion.site/Tag-A-Long-Privacy-Policy-35843955dac980749da8ef205ab7a8d6')}>
                   <Text style={styles.legalLink}>Privacy Policy</Text>
                 </TouchableOpacity>
-                <Text style={styles.legalDot}>{'�'}</Text>
+                <Text style={styles.legalDot}>{'•'}</Text>
                 <TouchableOpacity onPress={() => Linking.openURL('https://maddening-sodium-7eb.notion.site/Tag-A-Long-Terms-of-Service-35843955dac98002853bcc3efa059da6')}>
                   <Text style={styles.legalLink}>Terms of Service</Text>
                 </TouchableOpacity>

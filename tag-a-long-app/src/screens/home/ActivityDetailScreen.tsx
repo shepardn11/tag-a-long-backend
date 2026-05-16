@@ -334,17 +334,17 @@ export default function ActivityDetailScreen({ navigation, route }: Props) {
     <View style={styles.container}>
       {/* Header with back button */}
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
+        <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton} accessibilityLabel="Go back">
           <Ionicons name="arrow-back" size={24} color="#333" />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Activity Details</Text>
         <View style={styles.headerRight}>
           {isOwnActivity && (
-            <TouchableOpacity onPress={openEdit} style={styles.editButton}>
+            <TouchableOpacity onPress={openEdit} style={styles.editButton} accessibilityLabel="Edit activity">
               <Ionicons name="pencil-outline" size={22} color="#E8572A" />
             </TouchableOpacity>
           )}
-          <TouchableOpacity onPress={() => setShareVisible(true)} style={styles.shareButton}>
+          <TouchableOpacity onPress={() => setShareVisible(true)} style={styles.shareButton} accessibilityLabel="Share activity">
             <Ionicons name="share-social-outline" size={22} color="#E8572A" />
           </TouchableOpacity>
         </View>
@@ -568,7 +568,7 @@ export default function ActivityDetailScreen({ navigation, route }: Props) {
           })()}
           {/* Delete Activity - Only for owner */}
           {isOwnActivity && (
-            <TouchableOpacity style={styles.deleteButton} onPress={handleDeleteActivity}>
+            <TouchableOpacity style={styles.deleteButton} onPress={handleDeleteActivity} accessibilityLabel="Delete activity">
               <Ionicons name="trash-outline" size={18} color="#888" />
               <Text style={styles.deleteButtonText}>Delete Activity</Text>
             </TouchableOpacity>

@@ -9,9 +9,7 @@ export interface User {
   bio?: string;
   profile_photo_url?: string;
   photo_gallery?: string[];
-  instagram_handle?: string;
   created_at: string;
-  is_premium?: boolean;
 }
 
 export interface ActivityListing {
@@ -34,7 +32,6 @@ export interface ActivityListing {
   username?: string;
   display_name?: string;
   profile_photo_url?: string;
-  is_premium?: boolean;
 }
 
 export interface TagAlongRequest {
@@ -95,7 +92,6 @@ export interface SignupData {
   city: string;
   date_of_birth: string;
   bio?: string;
-  instagram_handle?: string;
   phone: string;
   otp_code: string;
 }

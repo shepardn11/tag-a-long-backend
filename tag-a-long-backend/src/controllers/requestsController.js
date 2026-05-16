@@ -293,6 +293,15 @@ const acceptRequest = async (req, res, next) => {
       },
     });
 
+    // Add requester to tagged_users so they appear in the edit screen's who's-joining list
+    const currentTaggedUsers = request.listing.tagged_users || [];
+    if (!currentTaggedUsers.includes(request.requester_id)) {
+      await prisma.listing.update({
+        where: { id: request.listing_id },
+        data: { tagged_users: { push: request.requester_id } },
+      });
+    }
+
     // Mark the request_received notification as read for the listing owner
     await prisma.notification.updateMany({
       where: {
@@ -351,6 +360,12 @@ const acceptRequest = async (req, res, next) => {
         sender_id: request.listing.user_id,
         content: `[activity_share]${activitySharePayload}`,
       },
+    });
+
+    // Bump conversation so it sorts to the top of both users' inboxes
+    await prisma.conversation.update({
+      where: { id: conversation.id },
+      data: { updated_at: new Date() },
     });
 
     // Create in-app notification
@@ -524,6 +539,13 @@ const removeParticipant = async (req, res, next) => {
     const updatedRequest = await prisma.tagAlongRequest.update({
       where: { id },
       data: { status: 'rejected', responded_at: new Date() },
+    });
+
+    // Remove requester from tagged_users so they no longer appear in the edit screen
+    const currentTaggedUsers = request.listing.tagged_users || [];
+    await prisma.listing.update({
+      where: { id: request.listing_id },
+      data: { tagged_users: currentTaggedUsers.filter(uid => uid !== request.requester_id) },
     });
 
     res.json({ success: true, data: updatedRequest });

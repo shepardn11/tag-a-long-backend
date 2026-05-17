@@ -98,6 +98,7 @@ export default function FeedScreen({ navigation }: Props) {
   const [isLoading, setIsLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [isFetchingMore, setIsFetchingMore] = useState(false);
+  const isFetchingMoreRef = useRef(false);
   const [hasMore, setHasMore] = useState(true);
   const dbOffsetRef = useRef(0);
   const [error, setError] = useState<string | null>(null);
@@ -262,16 +263,23 @@ export default function FeedScreen({ navigation }: Props) {
   }, [buildOptions]);
 
   const loadMore = useCallback(async () => {
-    if (!hasMore || isFetchingMore || isLoading) return;
+    if (!hasMore || isFetchingMoreRef.current || isLoading) return;
+    isFetchingMoreRef.current = true;
     setIsFetchingMore(true);
     try {
       const data = await listingAPI.getFeed(20, dbOffsetRef.current, buildOptions());
-      setListings(prev => [...prev, ...data.listings]);
+      setListings(prev => {
+        const existingIds = new Set(prev.map(l => l.id));
+        return [...prev, ...data.listings.filter((l: ActivityListing) => !existingIds.has(l.id))];
+      });
       setHasMore(data.has_more);
       dbOffsetRef.current += 20;
     } catch {}
-    finally { setIsFetchingMore(false); }
-  }, [hasMore, isFetchingMore, isLoading, buildOptions]);
+    finally {
+      isFetchingMoreRef.current = false;
+      setIsFetchingMore(false);
+    }
+  }, [hasMore, isLoading, buildOptions]);
 
   useEffect(() => {
     fetchListings();
